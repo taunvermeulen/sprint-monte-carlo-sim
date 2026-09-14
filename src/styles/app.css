@@ -50,16 +50,6 @@ body {
   margin: 4px 0 0;
   color: var(--ink-2);
 }
-.top .share {
-  flex-basis: 100%;
-  justify-content: flex-end;
-  margin-top: -4px;
-}
-@media (max-width: 920px) {
-  .top .share {
-    justify-content: flex-start;
-  }
-}
 .controls {
   display: flex;
   flex-wrap: wrap;
@@ -273,22 +263,22 @@ table.sheet {
 .tools .spacer {
   flex: 1;
 }
-details.paste {
+details.fold {
   margin-top: 10px;
   border: 1px dashed var(--line-2);
   border-radius: 8px;
   padding: 8px 10px;
 }
-details.paste summary {
+details.fold summary {
   cursor: pointer;
   font-weight: 600;
   color: var(--ink-2);
   font-size: 12px;
 }
-details.paste .hint {
+details.fold .hint {
   margin-top: 6px;
 }
-details.paste textarea {
+details.fold textarea {
   width: 100%;
   margin-top: 8px;
   min-height: 90px;
@@ -301,49 +291,6 @@ details.paste textarea {
   resize: vertical;
 }
 
-/* ---------- metric strip ---------- */
-.metrics {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  margin-top: 14px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  overflow: hidden;
-}
-.metrics .m {
-  padding: 10px 12px;
-  border-top: 1px solid var(--line);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.metrics .m:nth-child(-n + 2) {
-  border-top: 0;
-}
-.metrics .m:nth-child(odd) {
-  border-right: 1px solid var(--line);
-}
-.metrics .m.full {
-  grid-column: 1 / -1;
-  border-right: 0;
-}
-.m .lab {
-  font-size: 11px;
-  color: var(--ink-2);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.m .val {
-  font-size: 18px;
-  font-weight: 600;
-}
-.m .val small {
-  font-size: 12px;
-  color: var(--ink-3);
-  font-weight: 400;
-  margin-left: 4px;
-}
 .key {
   display: inline-block;
   width: 10px;
@@ -393,97 +340,270 @@ details.paste textarea {
   color: var(--ink);
   cursor: pointer;
 }
-.derived {
-  margin-top: 14px;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-.derived .d {
-  background: var(--surface-2);
-  border-radius: 8px;
-  padding: 10px 12px;
-}
-.derived .lab {
-  font-size: 11px;
-  color: var(--ink-2);
-}
-.derived .val {
-  font-size: 18px;
-  font-weight: 600;
-}
-.derived .val small {
-  font-size: 11px;
-  color: var(--ink-3);
-  font-weight: 400;
-}
 
-/* ---------- headline tiles ---------- */
-.tiles {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+/* ---------- steps, help, summaries ---------- */
+.step-no {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--bg);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0;
+  vertical-align: -3px;
 }
-@media (max-width: 560px) {
-  .tiles {
-    grid-template-columns: 1fr;
-  }
-}
-.tile {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 16px 18px 14px;
-  position: relative;
-  overflow: hidden;
-  min-width: 0;
-}
-.tile::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-}
-.tile.points::before {
-  background: var(--points);
-}
-.tile.stories::before {
-  background: var(--stories);
-}
-.tile .lab {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-2);
+.panel-h h2 {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap;
 }
-.tile .big {
-  font-size: 52px;
-  font-weight: 600;
-  line-height: 1;
-  margin: 10px 0 8px;
-  letter-spacing: -0.02em;
+.help {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+  letter-spacing: 0;
+  text-transform: none;
 }
-.tile .big small {
-  font-size: 22px;
+.help-btn {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 1px solid var(--line-2);
+  border-radius: 50%;
+  background: var(--surface);
   color: var(--ink-3);
-  font-weight: 500;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: help;
 }
-.tile .line {
+.help-btn:hover,
+.help-btn:focus-visible {
+  color: var(--ink);
+  border-color: var(--ink-2);
+}
+.help-pop {
+  display: none;
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  width: 260px;
+  max-width: calc(100vw - 40px);
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--tip-bg);
+  color: var(--tip-ink);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.45;
+  text-align: left;
+  white-space: normal;
+  z-index: 5;
+}
+.help-pop::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border: 5px solid transparent;
+  border-top-color: var(--tip-bg);
+}
+.help:hover .help-pop,
+.help:focus-within .help-pop {
+  display: block;
+}
+.summary {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--surface-2);
   color: var(--ink-2);
   font-size: 13px;
+  line-height: 1.5;
 }
-.tile .line b {
+.summary b {
   color: var(--ink);
   font-weight: 600;
 }
+details.fold .opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  font-size: 13px;
+}
+details.fold .opt-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-top: 8px;
+}
+details.fold .opt-grid .f {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+details.fold .opt-grid label,
+details.fold .opt-grid .lbl {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+.btn.quiet {
+  color: var(--ink-3);
+  border-color: transparent;
+}
+.btn.link {
+  border: 0;
+  background: transparent;
+  padding: 6px 0;
+  color: var(--points);
+  font-weight: 700;
+}
+.btn.link:hover {
+  background: transparent;
+  text-decoration: underline;
+}
+
+/* ---------- the answer ---------- */
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.hero .big {
+  font-size: 64px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  flex: none;
+}
+.hero .big small {
+  font-size: 26px;
+  color: var(--ink-3);
+  font-weight: 500;
+}
+.hero .big.safe {
+  color: var(--good);
+}
+.hero .big.probable {
+  color: var(--warn);
+}
+.hero .big.risk {
+  color: var(--bad);
+}
+.hero-text {
+  flex: 1;
+  min-width: 220px;
+}
+.hero .lead {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.4;
+}
+.hero .lead b {
+  font-weight: 700;
+}
+.hero .lead .pill {
+  margin-left: 6px;
+  vertical-align: 2px;
+}
+.hero .sub {
+  margin: 6px 0 0;
+  color: var(--ink-2);
+  font-size: 13px;
+}
+.facts {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.facts li {
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.facts li b {
+  color: var(--ink);
+  font-weight: 600;
+}
+.facts li.notice {
+  background: var(--warn-bg);
+  color: var(--ink);
+}
+.facts li.quiet {
+  background: transparent;
+  padding-block: 4px;
+}
+.answer .stamp {
+  margin: 12px 0 0;
+}
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.details[hidden] {
+  display: none;
+}
+
+/* ---------- learn ---------- */
+details.learn {
+  padding: 12px 16px;
+  border: 1px dashed var(--line-2);
+  border-radius: 12px;
+  color: var(--ink-2);
+}
+details.learn summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--ink);
+}
+details.learn ol {
+  margin: 12px 0 8px;
+  padding-left: 20px;
+  display: grid;
+  gap: 8px;
+  max-width: 68ch;
+}
+details.learn li b {
+  color: var(--ink);
+}
+details.learn .hint {
+  max-width: 68ch;
+}
+
+/* ---------- model inputs ---------- */
+table.model {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.model td {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+.model tr:last-child td {
+  border-bottom: 0;
+}
+.model td:first-child {
+  color: var(--ink-2);
+  width: 45%;
+}
+
 .pill {
   display: inline-flex;
   align-items: center;
@@ -571,6 +691,9 @@ table.dist {
 }
 .dist tr.p85 td {
   background: var(--surface-2);
+}
+.dist tr.prob td {
+  border-bottom-width: 2px;
 }
 
 /* ---------- histograms ---------- */

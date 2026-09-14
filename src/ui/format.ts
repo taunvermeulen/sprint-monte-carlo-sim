@@ -5,6 +5,14 @@ export const formatInt = (n: number): string => integer.format(Math.round(n));
 export const formatDecimal = (n: number): string => oneDecimal.format(n);
 export const formatPercent = (fraction: number, digits = 1): string => `${(fraction * 100).toFixed(digits)}%`;
 
+const dayMonthYear = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+
+/** "2026-06-24" → "24 Jun 2026". Unreadable dates come back as typed. */
+export function formatDate(iso: string): string {
+  const time = Date.parse(iso);
+  return Number.isFinite(time) ? dayMonthYear.format(new Date(time)) : iso;
+}
+
 /** Signed difference for "+74 cushion" / "−12 short" phrasing. */
 export function formatSigned(n: number): string {
   return `${n >= 0 ? '+' : '−'}${formatInt(Math.abs(n))}`;

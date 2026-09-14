@@ -1,65 +1,41 @@
 import type { ForecastInputs } from '../domain/types';
 import type { Store } from '../state/store';
-import { TRIAL_COUNTS } from '../state/options';
 import { buildShareUrl } from '../services/shareLink';
 import { copyText, downloadInputs, readInputsFile } from '../services/transfer';
-import { formatInt, requireElement } from './format';
+import { requireElement } from './format';
 
-const SOURCE = 'toolbar';
 const MESSAGE_MS = 4000;
 
-export interface ToolbarHandlers {
-  onRecalculate(): void;
-}
-
 export interface Toolbar {
-  /** Show when the results were last rolled. */
-  stamp(date: Date): void;
   notify(message: string): void;
 }
 
-export function mountToolbar(root: HTMLElement, store: Store<ForecastInputs>, handlers: ToolbarHandlers): Toolbar {
+/** Title plus the three ways to move data around. Nothing else lives up here. */
+export function mountToolbar(root: HTMLElement, store: Store<ForecastInputs>): Toolbar {
   root.innerHTML = `
     <div>
       <h1>Monte Carlo Sprint Sim</h1>
-      <p class="sub">Delivery odds from your sprint history &mdash; velocity (points) and flow (stories), side by side.</p>
+      <p class="sub">Will the team make it? Odds, not guesses &mdash; from the sprints you've already done.</p>
     </div>
     <div class="controls">
-      <label class="stamp" for="trials">Trials
-        <select id="trials" class="sel">
-          ${TRIAL_COUNTS.map((n) => `<option value="${n}">${formatInt(n)}</option>`).join('')}
-        </select>
-      </label>
-      <button id="reroll" class="btn primary" type="button">Recalculate odds</button>
-      <span class="stamp" id="stamp"></span>
-    </div>
-    <div class="controls share">
       <button id="share" class="btn small" type="button">Copy share link</button>
-      <button id="export" class="btn small" type="button">Export JSON</button>
-      <button id="importBtn" class="btn small" type="button">Import JSON</button>
+      <button id="export" class="btn small" type="button">Export</button>
+      <button id="importBtn" class="btn small" type="button">Import</button>
       <input id="importFile" type="file" accept="application/json,.json" hidden>
       <span class="stamp" id="message"></span>
     </div>`;
 
-  const trials = requireElement<HTMLSelectElement>(root, '#trials');
-  const stamp = requireElement(root, '#stamp');
   const message = requireElement(root, '#message');
   const importFile = requireElement<HTMLInputElement>(root, '#importFile');
 
   let messageTimer: ReturnType<typeof setTimeout> | undefined;
   const toolbar: Toolbar = {
-    stamp(date) {
-      stamp.innerHTML = `Last calculated <b>${date.toLocaleTimeString()}</b>`;
-    },
     notify(text) {
       message.textContent = text;
       clearTimeout(messageTimer);
       messageTimer = setTimeout(() => (message.textContent = ''), MESSAGE_MS);
     },
   };
-
-  trials.addEventListener('change', () => store.update((s) => ({ ...s, trials: Number(trials.value) }), { source: SOURCE }));
-  requireElement(root, '#reroll').addEventListener('click', handlers.onRecalculate);
 
   requireElement(root, '#share').addEventListener('click', async () => {
     const url = buildShareUrl(store.get(), window.location);
@@ -85,9 +61,5 @@ export function mountToolbar(root: HTMLElement, store: Store<ForecastInputs>, ha
     importFile.value = '';
   });
 
-  store.subscribe((inputs, meta) => {
-    if (meta.source !== SOURCE) trials.value = String(inputs.trials);
-  });
-  trials.value = String(store.get().trials);
   return toolbar;
 }

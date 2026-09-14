@@ -1,56 +1,36 @@
-import type { DerivedInputs, Forecast, SeriesForecast } from '../domain/types';
-import { bindingCommitment, confidenceBand, diagnoseSizing } from '../domain/interpretation';
-import { escapeHtml, formatDecimal, formatInt, formatPercent, formatSigned, requireElement } from './format';
+import type { DerivedInputs, Forecast, ForecastInputs, SeriesForecast } from '../domain/types';
+import { bindingCommitment } from '../domain/interpretation';
+import { formatDate, formatDecimal, formatInt, formatPercent, requireElement } from './format';
+import { help } from './help';
 import { histogramSvg, type SeriesKey } from './histogram';
 
-interface ResultsRegions {
-  metrics: HTMLElement;
-  derived: HTMLElement;
-  autoSize: HTMLElement;
-  tiles: HTMLElement;
-  distribution: HTMLElement;
-  charts: HTMLElement;
-  reading: HTMLElement;
-}
-
 const SERIES: { key: SeriesKey; title: string; unit: string }[] = [
-  { key: 'points', title: 'Velocity probability', unit: 'points' },
-  { key: 'stories', title: 'Flow probability', unit: 'stories' },
+  { key: 'points', title: 'Points delivered', unit: 'points' },
+  { key: 'stories', title: 'Stories delivered', unit: 'stories' },
 ];
 
-function metricsHtml(d: DerivedInputs): string {
-  const note = d.sprintsUsed < 3 ? ' &mdash; add more history for a usable spread' : '';
-  return `
-    <div class="m"><span class="lab"><i class="key points"></i>Velocity &mdash; avg points</span><span class="val mono">${formatDecimal(d.points.mean)}<small>/ sprint</small></span></div>
-    <div class="m"><span class="lab"><i class="key stories"></i>Flow &mdash; avg stories</span><span class="val mono">${formatDecimal(d.stories.mean)}<small>/ sprint</small></span></div>
-    <div class="m"><span class="lab">Std deviation (points)</span><span class="val mono">${formatDecimal(d.points.stdDev)}</span></div>
-    <div class="m"><span class="lab">Std deviation (stories)</span><span class="val mono">${formatDecimal(d.stories.stdDev)}</span></div>
-    <div class="m full"><span class="lab">Based on <b class="mono">${d.sprintsUsed}</b>&nbsp;of ${d.sprintsComplete} complete sprints${note}</span></div>`;
+/* ---------- plain-language summaries shown inside steps 1 and 2 ---------- */
+
+function patternSentence(d: DerivedInputs): string {
+  if (d.sprintsUsed === 0) return 'Add a few sprints and the team’s pattern will appear here.';
+  const scope = d.sprintsUsed === d.sprintsComplete ? `all ${d.sprintsUsed}` : `the last ${d.sprintsUsed} of ${d.sprintsComplete}`;
+  const few = d.sprintsUsed < 3 ? ' Three or more sprints give a much better read.' : '';
+  return `Over ${scope} sprints the team finishes about <b class="mono">${formatDecimal(d.points.mean)} points</b> (&plusmn;${formatDecimal(d.points.stdDev)}) and <b class="mono">${formatDecimal(d.stories.mean)} stories</b> (&plusmn;${formatDecimal(d.stories.stdDev)}) per sprint. ${help('variability')}${few}`;
 }
 
-function derivedHtml(d: DerivedInputs): string {
-  return `
-    <div class="d"><div class="lab">Days to target</div><div class="val mono">${formatInt(d.daysAvailable)}</div></div>
-    <div class="d"><div class="lab">Sprints available</div><div class="val mono">${d.sprintsAvailable}</div></div>
-    <div class="d"><div class="lab">Target scope</div><div class="val mono">${formatInt(d.targetStories)} <small>stories</small></div></div>`;
+function planSentence(d: DerivedInputs, inputs: ForecastInputs): string {
+  if (d.sprintsAvailable <= 0) return `No full sprint fits between ${formatDate(inputs.startDate)} and ${formatDate(inputs.targetDate)}.`;
+  const size = d.storySize > 0 ? `, or about <b class="mono">${formatInt(d.targetStories)} stories</b> at ${formatDecimal(d.storySize)} points each` : '';
+  return `That’s <b class="mono">${d.sprintsAvailable} sprint${d.sprintsAvailable === 1 ? '' : 's'}</b> between ${formatDate(inputs.startDate)} and ${formatDate(inputs.targetDate)}${size}.`;
 }
 
-function tileHtml(key: SeriesKey, title: string, unit: string, series: SeriesForecast, d: DerivedInputs): string {
-  const band = confidenceBand(series.probability);
-  const cushion = series.p85 - series.target;
-  return `<div class="tile ${key}">
-    <div class="lab"><span>${title}</span><span class="pill ${band.level}">${band.label}</span></div>
-    <div class="big mono">${d.sprintsAvailable > 0 ? (series.probability * 100).toFixed(1) : '&mdash;'}<small>%</small></div>
-    <div class="line">odds of <b class="mono">${formatInt(series.target)}</b> ${unit} in <b class="mono">${d.sprintsAvailable}</b> sprints</div>
-    <div class="line">P85 delivers <b class="mono">${formatInt(series.p85)}</b> &middot; <span class="mono">${formatSigned(cushion)}</span> ${cushion >= 0 ? 'cushion' : 'short'}</div>
-  </div>`;
-}
+/* ---------- the full breakdown ---------- */
 
 const PERCENTILE_ROWS: { label: string; note: string; field: 'p50' | 'p75' | 'p85' | 'p95' }[] = [
-  { label: 'P50', note: 'A coin toss', field: 'p50' },
-  { label: 'P75', note: 'Probable', field: 'p75' },
-  { label: 'P85', note: 'Safe commitment', field: 'p85' },
-  { label: 'P95', note: 'Near certain', field: 'p95' },
+  { label: 'P50', note: 'a coin toss', field: 'p50' },
+  { label: 'P75', note: 'probable', field: 'p75' },
+  { label: 'P85', note: 'safe commitment', field: 'p85' },
+  { label: 'P95', note: 'near certain', field: 'p95' },
 ];
 
 function distributionHtml(forecast: Forecast): string {
@@ -63,47 +43,55 @@ function distributionHtml(forecast: Forecast): string {
     (row) =>
       `<tr class="${row.field}"><td><span class="p">${row.label}</span><span class="why">${row.note}</span></td>${cell(forecast.points, row.field)}${cell(forecast.stories, row.field)}</tr>`,
   ).join('');
-  return `<thead><tr><th>Confidence</th><th><i class="key points"></i> Points delivered</th><th><i class="key stories"></i> Stories delivered</th></tr></thead><tbody>${rows}</tbody>`;
+  const probability = `<tr class="prob"><td><span class="p">Odds</span><span class="why">of hitting the target</span></td><td><span class="v mono">${formatPercent(forecast.points.probability)}</span></td><td><span class="v mono">${formatPercent(forecast.stories.probability)}</span></td></tr>`;
+  return `<thead><tr><th>Confidence</th><th><i class="key points"></i> Points</th><th><i class="key stories"></i> Stories</th></tr></thead><tbody>${probability}${rows}</tbody>`;
 }
 
 function chartsHtml(forecast: Forecast): string {
-  return SERIES.map(({ key, unit }) => {
+  return SERIES.map(({ key, title, unit }) => {
     const series = forecast[key];
-    const title = key === 'points' ? 'Points delivered' : 'Stories delivered';
     return `<div class="chart" data-unit="${unit}" data-trials="${series.samples.length}">
-      <div class="ct"><h3><i class="key ${key}"></i>${title}</h3><span class="n mono">${formatInt(series.samples.length)} trials</span></div>
+      <div class="ct"><h3><i class="key ${key}"></i>${title}</h3><span class="n mono">${formatInt(series.samples.length)} replays</span></div>
       ${histogramSvg(series, key, unit)}
     </div>`;
   }).join('');
 }
 
-function readingHtml(forecast: Forecast): string {
-  const diagnosis = diagnoseSizing(forecast);
+function modelHtml(forecast: Forecast, inputs: ForecastInputs): string {
+  const d = forecast.derived;
+  const row = (label: string, value: string) => `<tr><td>${label}</td><td class="mono">${value}</td></tr>`;
+  return `<tbody>
+    ${row('Sprints in history', `${d.sprintsUsed} of ${d.sprintsComplete}`)}
+    ${row('Velocity mean / std dev', `${formatDecimal(d.points.mean)} / ${formatDecimal(d.points.stdDev)} pts`)}
+    ${row('Flow mean / std dev', `${formatDecimal(d.stories.mean)} / ${formatDecimal(d.stories.stdDev)} stories`)}
+    ${row('Sprints available', `${d.sprintsAvailable} (${formatInt(d.daysAvailable)} days &divide; ${inputs.sprintDays})`)}
+    ${row('Points per story', `${formatDecimal(d.storySize)} (${inputs.sizeMode === 'auto' ? 'from history' : 'set manually'})`)}
+    ${row('Targets', `${formatInt(inputs.targetPoints)} pts &middot; ${formatInt(d.targetStories)} stories`)}
+    ${row('Per-trial draw', `N(${d.sprintsAvailable} &times; mean, &radic;${d.sprintsAvailable} &times; sd), &times; ${formatInt(inputs.trials)}`)}
+  </tbody>`;
+}
+
+function rulesHtml(forecast: Forecast): string {
   const commit = bindingCommitment(forecast);
-  const golden =
-    forecast.derived.sprintsAvailable > 0
-      ? `The tighter P85 is <b>${commit.series === 'points' ? 'velocity' : 'flow'}</b>: at 85% confidence the team delivers <b class="mono">${formatInt(commit.delivered)} ${commit.series}</b> against a target of <b class="mono">${formatInt(commit.target)}</b> (${formatPercent(commit.ratio, 0)}). A project isn't done until both effort and scope land, so that is the honest commitment${commit.ratio < 1 ? ' &mdash; and it falls short of the target' : ''}.`
-      : 'Once sprints are available, the lower of the two P85 figures is your commitment.';
   return `
-    <div class="r lead"><span class="num">now</span><div><h4>${escapeHtml(diagnosis.title)}</h4><p>${escapeHtml(diagnosis.detail)}</p></div></div>
-    <div class="r"><span class="num">rule</span><div><h4>Commit on whichever P85 is lower</h4><p>${golden}</p></div></div>
-    <div class="r muted"><span class="num">1</span><div><h4>High point odds, low flow odds</h4><p>Stories are too small. You have the point capacity, but the volume of stories will cause context-switching bottlenecks.</p></div></div>
-    <div class="r muted"><span class="num">2</span><div><h4>Low point odds, high flow odds</h4><p>Stories are too big. You can finish the number of tickets, but the point effort required exceeds your capacity. Refine and split.</p></div></div>`;
+    <div class="r"><span class="num">rule</span><div><h4>Commit on whichever P85 is lower</h4><p>A project isn't done until both effort and scope land. Right now the tighter one is <b>${commit.series}</b>: <b class="mono">${formatInt(commit.delivered)}</b> against a target of <b class="mono">${formatInt(commit.target)}</b> (${formatPercent(commit.ratio, 0)}).</p></div></div>
+    <div class="r"><span class="num">1</span><div><h4>High point odds, low story odds</h4><p>Stories are too small. You have the point capacity, but the volume of tickets will cause context-switching bottlenecks. Merge trivial stories.</p></div></div>
+    <div class="r"><span class="num">2</span><div><h4>Low point odds, high story odds</h4><p>Stories are too big. You can finish the number of tickets, but the effort required exceeds your capacity. Refine and split.</p></div></div>`;
 }
 
 export interface ResultsView {
-  render(forecast: Forecast): void;
+  render(forecast: Forecast, inputs: ForecastInputs): void;
 }
 
 export function mountResults(root: ParentNode): ResultsView {
-  const regions: ResultsRegions = {
-    metrics: requireElement(root, '#metrics'),
-    derived: requireElement(root, '#derived'),
+  const regions = {
+    pattern: requireElement(root, '#pattern'),
+    plan: requireElement(root, '#plan'),
     autoSize: requireElement(root, '#autoSize'),
-    tiles: requireElement(root, '#tiles'),
     distribution: requireElement(root, '#distribution'),
     charts: requireElement(root, '#charts'),
-    reading: requireElement(root, '#reading'),
+    model: requireElement(root, '#model'),
+    rules: requireElement(root, '#rules'),
   };
 
   // One delegated tooltip for both charts.
@@ -121,7 +109,7 @@ export function mountResults(root: ParentNode): ResultsView {
     const box = chart.getBoundingClientRect();
     const count = Number(bar.dataset.count);
     const trials = Number(chart.dataset.trials) || 1;
-    tip.textContent = `${formatInt(Number(bar.dataset.lo))}–${formatInt(Number(bar.dataset.hi))} ${chart.dataset.unit} · ${count} trials (${formatPercent(count / trials)})`;
+    tip.textContent = `${formatInt(Number(bar.dataset.lo))}–${formatInt(Number(bar.dataset.hi))} ${chart.dataset.unit} · ${count} replays (${formatPercent(count / trials)})`;
     tip.style.left = `${event.clientX - box.left}px`;
     tip.style.top = `${event.clientY - box.top - 8}px`;
     tip.hidden = false;
@@ -131,15 +119,15 @@ export function mountResults(root: ParentNode): ResultsView {
   });
 
   return {
-    render(forecast) {
+    render(forecast, inputs) {
       const d = forecast.derived;
-      regions.metrics.innerHTML = metricsHtml(d);
-      regions.derived.innerHTML = derivedHtml(d);
+      regions.pattern.innerHTML = patternSentence(d);
+      regions.plan.innerHTML = planSentence(d, inputs);
       regions.autoSize.textContent = d.autoStorySize ? `(${formatDecimal(d.autoStorySize)})` : '(—)';
-      regions.tiles.innerHTML = SERIES.map((s) => tileHtml(s.key, s.title, s.unit, forecast[s.key], d)).join('');
       regions.distribution.innerHTML = distributionHtml(forecast);
       regions.charts.innerHTML = chartsHtml(forecast);
-      regions.reading.innerHTML = readingHtml(forecast);
+      regions.model.innerHTML = modelHtml(forecast, inputs);
+      regions.rules.innerHTML = rulesHtml(forecast);
     },
   };
 }

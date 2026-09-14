@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Monte Carlo Sprint Sim</title>
-    <meta name="description" content="Forecast sprint delivery odds — velocity and flow — from your sprint history." />
+    <meta name="description" content="Will the team make it? Delivery odds from the sprints you've already done." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -23,28 +23,31 @@
         </div>
 
         <div class="col">
-          <div class="tiles" id="tiles"></div>
+          <section class="panel answer" id="odds"></section>
 
-          <section class="panel">
-            <div class="panel-h">
-              <h2>Distribution outcomes</h2>
-              <span class="hint">What the simulated sprints deliver by the target date</span>
-            </div>
-            <div class="panel-b scroll-x"><table class="dist" id="distribution"></table></div>
-          </section>
+          <div class="details" id="details" hidden>
+            <section class="panel">
+              <div class="panel-h"><h2>Outcomes by confidence</h2><span class="hint">What the replays delivered by the target date</span></div>
+              <div class="panel-b scroll-x"><table class="dist" id="distribution"></table></div>
+            </section>
 
-          <section class="panel">
-            <div class="panel-h">
-              <h2>Where the trials landed</h2>
-              <span class="hint">Hover a bar for its range</span>
-            </div>
-            <div class="panel-b charts" id="charts"></div>
-          </section>
+            <section class="panel">
+              <div class="panel-h"><h2>Where the replays landed</h2><span class="hint">Hover a bar for its range</span></div>
+              <div class="panel-b charts" id="charts"></div>
+            </section>
 
-          <section class="panel">
-            <div class="panel-h"><h2>Reading the two numbers together</h2></div>
-            <div class="panel-b read" id="reading"></div>
-          </section>
+            <section class="panel">
+              <div class="panel-h"><h2>Reading the two measures</h2></div>
+              <div class="panel-b read" id="rules"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-h"><h2>Model inputs</h2></div>
+              <div class="panel-b"><table class="model" id="model"></table></div>
+            </section>
+          </div>
+
+          <section id="learn"></section>
         </div>
       </div>
     </div>

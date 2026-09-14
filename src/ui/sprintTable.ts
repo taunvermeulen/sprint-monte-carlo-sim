@@ -4,6 +4,7 @@ import { parseSprintRows } from '../services/spreadsheetParser';
 import type { Store } from '../state/store';
 import { WINDOW_SIZES } from '../state/options';
 import { escapeHtml, requireElement } from './format';
+import { help } from './help';
 
 const SOURCE = 'sprint-table';
 
@@ -24,40 +25,51 @@ function rowHtml(sprint: Sprint, index: number, outsideWindow: boolean): string 
   </tr>`;
 }
 
+/** Step 1: what the team finished in recent sprints. */
 export function mountSprintTable(root: HTMLElement, store: Store<ForecastInputs>): void {
   root.innerHTML = `
     <div class="panel-h">
-      <h2>Sprint history</h2>
-      <label class="stamp" for="window">Use
-        <select id="window" class="sel">
-          <option value="all">all sprints</option>
-          ${WINDOW_SIZES.map((n) => `<option value="${n}">last ${n}</option>`).join('')}
-        </select>
-      </label>
+      <h2><span class="step-no">1</span> Your sprints</h2>
+      <span class="hint">What did the team finish in recent sprints?</span>
     </div>
     <div class="panel-b">
       <div class="sheet-wrap">
         <table class="sheet">
-          <thead><tr><th></th><th>Sprint</th><th class="num">Points</th><th class="num">Stories</th><th></th></tr></thead>
+          <thead><tr>
+            <th></th><th>Sprint</th>
+            <th class="num">Points ${help('points')}</th>
+            <th class="num">Stories ${help('stories')}</th>
+            <th></th>
+          </tr></thead>
           <tbody id="rows"></tbody>
         </table>
       </div>
       <div class="tools">
         <button id="add" class="btn small" type="button">+ Add sprint</button>
         <span class="spacer"></span>
-        <button id="clear" class="btn small" type="button">Clear all</button>
+        <button id="clear" class="btn small quiet" type="button">Clear all</button>
       </div>
-      <details class="paste">
-        <summary>Paste from your spreadsheet</summary>
-        <p class="hint">Copy the three columns (name, points, stories) &mdash; or just the two number columns &mdash; and paste here. Header rows are skipped.</p>
+      <details class="fold" id="paste">
+        <summary>Paste from a spreadsheet</summary>
+        <p class="hint">Copy the name, points and stories columns (or just the two number columns) and paste below. Header rows are skipped.</p>
         <textarea id="pasteBox" placeholder="Sprint 35&#9;24&#9;7&#10;Sprint 36&#9;19&#9;6"></textarea>
         <div class="tools">
-          <button id="pasteAppend" class="btn small" type="button">Append rows</button>
-          <button id="pasteReplace" class="btn small" type="button">Replace history</button>
+          <button id="pasteAppend" class="btn small" type="button">Add these rows</button>
+          <button id="pasteReplace" class="btn small" type="button">Replace everything</button>
           <span class="hint" id="pasteMsg"></span>
         </div>
       </details>
-      <div class="metrics" id="metrics"></div>
+      <details class="fold">
+        <summary>Options</summary>
+        <label class="opt" for="window">Use
+          <select id="window" class="sel">
+            <option value="all">all sprints</option>
+            ${WINDOW_SIZES.map((n) => `<option value="${n}">the last ${n}</option>`).join('')}
+          </select>
+          for the forecast ${help('window')}
+        </label>
+      </details>
+      <p class="summary" id="pattern"></p>
     </div>`;
 
   const tbody = requireElement(root, '#rows');

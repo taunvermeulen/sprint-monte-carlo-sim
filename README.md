@@ -7,6 +7,22 @@ effort and scope land.
 
 Ported from a Google Sheets Apps Script dashboard. Same model, same numbers.
 
+## Who it's for
+
+Scrum teams who want to estimate in odds rather than promises, without needing
+to know what a Monte Carlo simulation is. The screen is three steps and one
+answer; everything a statistician would want is one click away.
+
+- **Step 1 — Your sprints.** Points and stories finished per sprint. Type them,
+  paste from a spreadsheet, or import a file.
+- **Step 2 — Your goal.** Points to deliver, by which date, sprint length.
+- **Step 3 — Your odds.** One percentage, a verdict, and a "safe bet" number in
+  plain English.
+- **Show the full breakdown** reveals the P50–P95 table, histograms, the
+  model's inputs and the cross-reference rules. The choice is remembered.
+- Every `?` explains one idea in two sentences. *How does this work?* at the
+  bottom tells the whole story in four points.
+
 ## What it does
 
 1. Takes sprint history (name, points, stories) — typed, pasted from a
@@ -57,14 +73,18 @@ src/
     serialization.ts  compact wire format for links and files
     shareLink.ts      inputs ⇄ URL hash
     transfer.ts       JSON export / import, clipboard
+    preferences.ts    per-browser UI preferences (breakdown open/closed)
     spreadsheetParser.ts  pasted spreadsheet text → sprint rows
   ui/                 one module per screen region; render from state, write to the store
-    toolbar.ts        trials, recalculate, share / export / import
-    sprintTable.ts    editable history table, paste box, window select
-    targetsForm.ts    dates, sprint length, target points, story size
-    results.ts        metrics, tiles, distribution table, charts, reading
+    toolbar.ts        title, share / export / import
+    sprintTable.ts    step 1: editable history, paste box, options
+    targetsForm.ts    step 2: goal, dates, sprint length, options
+    odds.ts           step 3: the answer — headline odds, safe bet, verdict
+    results.ts        the full breakdown + the plain-language summaries
     histogram.ts      SVG column chart
-    format.ts         number/HTML formatting helpers
+    learn.ts          the collapsed "how does this work" explainer
+    help.ts           glossary + the inline "?" popover
+    format.ts         number/date/HTML formatting helpers
   styles/
     tokens.css        colours and fonts (light + dark)
     app.css           layout and components

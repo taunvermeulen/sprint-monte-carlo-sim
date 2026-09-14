@@ -9,9 +9,9 @@ export interface ConfidenceBand {
 
 /** Where a probability sits on the commitment scale. */
 export function confidenceBand(probability: number): ConfidenceBand {
-  if (probability >= 0.85) return { level: 'safe', label: 'Safe commitment' };
-  if (probability >= 0.5) return { level: 'probable', label: 'Probable' };
-  return { level: 'risk', label: 'At risk' };
+  if (probability >= 0.85) return { level: 'safe', label: 'Safe to commit' };
+  if (probability >= 0.5) return { level: 'probable', label: 'Likely, not safe' };
+  return { level: 'risk', label: 'Unlikely' };
 }
 
 export type SizingKind = 'no-sprints' | 'points-ahead' | 'stories-ahead' | 'aligned';
