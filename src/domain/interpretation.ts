@@ -25,7 +25,11 @@ export interface SizingDiagnosis {
 /** Odds that differ by at least this much point to a story-sizing problem. */
 const SIZING_GAP = 0.15;
 
-/** Cross-reference the two probabilities the way the original sheet's notes describe. */
+/**
+ * Cross-reference the two probabilities. With story size taken from history the
+ * two means agree exactly, so a gap between the odds is a variability signal:
+ * whichever measure swings more relative to its average is the shakier one.
+ */
 export function diagnoseSizing(forecast: Forecast): SizingDiagnosis {
   if (forecast.derived.sprintsAvailable <= 0) {
     return {
@@ -40,7 +44,7 @@ export function diagnoseSizing(forecast: Forecast): SizingDiagnosis {
       kind: 'points-ahead',
       title: 'Point odds run ahead of story odds',
       detail:
-        'Stories are probably too small. You have the point capacity, but the sheer volume of tickets will cause context-switching bottlenecks. Consider merging trivial stories.',
+        'Effort isn’t the problem — finishing stories is. The number you close per sprint swings more than your points do, which usually means inconsistent story sizes or work that starts but doesn’t finish. Keep stories small and similar, limit work in progress, and trim per-story overhead.',
     };
   }
   if (gap <= -SIZING_GAP) {
@@ -48,7 +52,7 @@ export function diagnoseSizing(forecast: Forecast): SizingDiagnosis {
       kind: 'stories-ahead',
       title: 'Story odds run ahead of point odds',
       detail:
-        'Stories are probably too big. You can finish the number of tickets, but the effort required exceeds your capacity. Refine and split the large ones.',
+        'You close a steady number of stories, but the effort per sprint swings — a few large stories are carrying most of the points. Split the big ones so both measures settle.',
     };
   }
   return {

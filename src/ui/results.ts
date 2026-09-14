@@ -77,8 +77,8 @@ function rulesHtml(forecast: Forecast): string {
   const commit = bindingCommitment(forecast);
   return `
     <div class="r"><span class="num">rule</span><div><h4>Commit on whichever P85 is lower</h4><p>A project isn't done until both effort and scope land. Right now the tighter one is <b>${commit.series}</b>: <b class="mono">${formatInt(commit.delivered)}</b> against a target of <b class="mono">${formatInt(commit.target)}</b> (${formatPercent(commit.ratio, 0)}).</p></div></div>
-    <div class="r"><span class="num">1</span><div><h4>High point odds, low story odds</h4><p>Stories are too small. You have the point capacity, but the volume of tickets will cause context-switching bottlenecks. Merge trivial stories.</p></div></div>
-    <div class="r"><span class="num">2</span><div><h4>Low point odds, high story odds</h4><p>Stories are too big. You can finish the number of tickets, but the effort required exceeds your capacity. Refine and split.</p></div></div>`;
+    <div class="r"><span class="num">1</span><div><h4>High point odds, low story odds</h4><p>Effort isn't the problem — finishing stories is. Story count per sprint swings more than points do: inconsistent sizes, or work that starts but doesn't finish. Keep stories small and similar, limit work in progress, trim per-story overhead.</p></div></div>
+    <div class="r"><span class="num">2</span><div><h4>Low point odds, high story odds</h4><p>You close a steady number of stories, but effort per sprint swings — a few large stories carry most of the points. Split the big ones.</p></div></div>`;
 }
 
 export interface ResultsView {

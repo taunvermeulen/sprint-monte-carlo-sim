@@ -5,7 +5,7 @@ export const GLOSSARY = {
   points:
     'Story points: the effort your team completed in that sprint, using your own estimates. Any scale works as long as it stays consistent.',
   stories:
-    'How many stories (tickets) the team finished. Tracking both points and stories catches sizing problems — lots of points but few stories, or the reverse.',
+    'How many stories (tickets) the team finished. Tracking both points and stories shows whether effort or finishing is the shakier measure.',
   window:
     'Older sprints may not reflect the team today. Use fewer sprints if the team or the kind of work changed recently.',
   variability:

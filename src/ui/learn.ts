@@ -10,6 +10,6 @@ export function mountLearn(root: HTMLElement): void {
         <li><b>Why this beats one number.</b> Average velocity &times; sprints gives a single answer that's wrong about half the time. A range with odds lets you commit at 85% instead of 50% &mdash; and shows how much room you actually have.</li>
       </ol>
       <p class="hint">For the curious: each replay is one draw from a normal distribution with mean <span class="mono">sprints &times; average</span> and spread <span class="mono">&radic;sprints &times; std&nbsp;dev</span>, floored at zero. Percentiles use the inclusive method, like a spreadsheet's PERCENTILE.</p>
-      <p class="hint">Two measures are tracked because a project isn't done until both the effort (points) and the scope (stories) are delivered. When their odds disagree, it usually means stories are sized too big or too small.</p>
+      <p class="hint">Two measures are tracked because a project isn't done until both the effort (points) and the scope (stories) are delivered. When their odds disagree, the measure that swings more from sprint to sprint is the shaky one — usually a sign of inconsistent story sizes.</p>
     </details>`;
 }
