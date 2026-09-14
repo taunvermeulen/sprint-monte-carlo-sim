@@ -18,7 +18,8 @@ export const GLOSSARY = {
     'Your usual points per story, taken from your history. It turns the point target into a story count so the forecast can be checked both ways.',
   trials: 'How many times the remaining sprints are replayed. More trials give a steadier percentage; 1,000 is plenty.',
   reroll: 'Every run rolls the dice again, so the numbers wobble by a point or two. That wobble is normal — the range matters more than the last digit.',
-  sprintLength: 'How long one sprint is. It sets how many sprints fit before the target date.',
+  sprintLength:
+    'How long one sprint is — it sets how many sprints fit before the target date. It must match the sprints in step 1: a 2-week history counted as 1-week sprints would double the forecast.',
 } as const;
 
 export type HelpKey = keyof typeof GLOSSARY;
