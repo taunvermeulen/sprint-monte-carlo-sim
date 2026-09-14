@@ -917,6 +917,7 @@ table.dist {
 }
 .foot p {
   margin: 0;
+  max-width: 60ch;
 }
 .foot-logo {
   display: block;
