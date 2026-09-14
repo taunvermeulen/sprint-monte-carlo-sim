@@ -18,8 +18,8 @@ answer; everything a statistician would want is one click away.
 - **Step 2 — Your goal.** Points to deliver, by which date, sprint length.
 - **Step 3 — Your odds.** One percentage, a verdict, and a "safe bet" number in
   plain English.
-- **Show the full breakdown** reveals the P50–P95 table, histograms, the
-  model's inputs and the cross-reference rules. The choice is remembered.
+- **Show the full breakdown** reveals velocity and flow tiles, the P50–P95
+  table, histograms and the cross-reference rules. The choice is remembered.
 - Every `?` explains one idea in two sentences. *How does this work?* at the
   bottom tells the whole story in four points.
 

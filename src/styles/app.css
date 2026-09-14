@@ -597,54 +597,71 @@ details.learn .hint {
   max-width: 68ch;
 }
 
-/* ---------- model inputs ---------- */
-table.model {
-  width: 100%;
-  border-collapse: collapse;
+/* ---------- headline tiles ---------- */
+.tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 560px) {
+  .tiles {
+    grid-template-columns: 1fr;
+  }
+}
+.tile {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 18px 14px;
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+}
+.tile::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+}
+.tile.points::before {
+  background: var(--points);
+}
+.tile.stories::before {
+  background: var(--stories);
+}
+.tile .lab {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.tile .big {
+  font-size: 44px;
+  font-weight: 600;
+  line-height: 1;
+  margin: 10px 0 8px;
+  letter-spacing: -0.02em;
+}
+.tile .big small {
+  font-size: 20px;
+  color: var(--ink-3);
+  font-weight: 500;
+}
+.tile .line {
+  color: var(--ink-2);
   font-size: 13px;
 }
-.model td {
-  padding: 7px 10px;
-  border-bottom: 1px solid var(--line);
-  vertical-align: top;
-}
-.model tr:last-child td {
-  border-bottom: 0;
-}
-.model td:first-child {
-  color: var(--ink-2);
-  width: 45%;
-}
-
-.pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border-radius: 999px;
-  padding: 3px 10px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-.pill::before {
-  content: '';
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: currentColor;
-}
-.pill.safe {
-  background: var(--good-bg);
-  color: var(--good);
-}
-.pill.probable {
-  background: var(--warn-bg);
-  color: var(--warn);
-}
-.pill.risk {
-  background: var(--bad-bg);
-  color: var(--bad);
+.tile .line b {
+  color: var(--ink);
+  font-weight: 600;
 }
 
 /* ---------- distribution table ---------- */

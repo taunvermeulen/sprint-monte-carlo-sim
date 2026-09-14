@@ -1,6 +1,6 @@
 import type { DerivedInputs, Forecast, ForecastInputs, SeriesForecast } from '../domain/types';
-import { bindingCommitment } from '../domain/interpretation';
-import { formatDate, formatDecimal, formatInt, formatPercent, requireElement } from './format';
+import { bindingCommitment, confidenceBand } from '../domain/interpretation';
+import { formatDate, formatDecimal, formatInt, formatPercent, formatSigned, requireElement } from './format';
 import { help } from './help';
 import { histogramSvg, type SeriesKey } from './histogram';
 
@@ -25,6 +25,22 @@ function planSentence(d: DerivedInputs, inputs: ForecastInputs): string {
 }
 
 /* ---------- the full breakdown ---------- */
+
+function tileHtml(key: SeriesKey, title: string, unit: string, series: SeriesForecast, d: DerivedInputs): string {
+  const band = confidenceBand(series.probability);
+  const cushion = series.p85 - series.target;
+  return `<div class="tile ${key}">
+    <div class="lab"><span>${title}</span><span class="pill ${band.level}">${band.label}</span></div>
+    <div class="big mono">${d.sprintsAvailable > 0 ? (series.probability * 100).toFixed(1) : '&mdash;'}<small>%</small></div>
+    <div class="line">odds of <b class="mono">${formatInt(series.target)}</b> ${unit} in <b class="mono">${d.sprintsAvailable}</b> sprints</div>
+    <div class="line">P85 delivers <b class="mono">${formatInt(series.p85)}</b> &middot; <span class="mono">${formatSigned(cushion)}</span> ${cushion >= 0 ? 'cushion' : 'short'}</div>
+  </div>`;
+}
+
+const TILES: { key: SeriesKey; title: string; unit: string }[] = [
+  { key: 'points', title: 'Velocity probability', unit: 'points' },
+  { key: 'stories', title: 'Flow probability', unit: 'stories' },
+];
 
 const PERCENTILE_ROWS: { label: string; note: string; field: 'p50' | 'p75' | 'p85' | 'p95' }[] = [
   { label: 'P50', note: 'a coin toss', field: 'p50' },
@@ -57,20 +73,6 @@ function chartsHtml(forecast: Forecast): string {
   }).join('');
 }
 
-function modelHtml(forecast: Forecast, inputs: ForecastInputs): string {
-  const d = forecast.derived;
-  const row = (label: string, value: string) => `<tr><td>${label}</td><td class="mono">${value}</td></tr>`;
-  return `<tbody>
-    ${row('Sprints in history', `${d.sprintsUsed} of ${d.sprintsComplete}`)}
-    ${row('Velocity mean / std dev', `${formatDecimal(d.points.mean)} / ${formatDecimal(d.points.stdDev)} pts`)}
-    ${row('Flow mean / std dev', `${formatDecimal(d.stories.mean)} / ${formatDecimal(d.stories.stdDev)} stories`)}
-    ${row('Sprints available', `${d.sprintsAvailable} (${formatInt(d.daysAvailable)} days &divide; ${inputs.sprintDays})`)}
-    ${row('Points per story', `${formatDecimal(d.storySize)} (${inputs.sizeMode === 'auto' ? 'from history' : 'set manually'})`)}
-    ${row('Targets', `${formatInt(inputs.targetPoints)} pts &middot; ${formatInt(d.targetStories)} stories`)}
-    ${row('Per-trial draw', `N(${d.sprintsAvailable} &times; mean, &radic;${d.sprintsAvailable} &times; sd), &times; ${formatInt(inputs.trials)}`)}
-  </tbody>`;
-}
-
 function rulesHtml(forecast: Forecast): string {
   const commit = bindingCommitment(forecast);
   return `
@@ -88,9 +90,9 @@ export function mountResults(root: ParentNode): ResultsView {
     pattern: requireElement(root, '#pattern'),
     plan: requireElement(root, '#plan'),
     autoSize: requireElement(root, '#autoSize'),
+    tiles: requireElement(root, '#tiles'),
     distribution: requireElement(root, '#distribution'),
     charts: requireElement(root, '#charts'),
-    model: requireElement(root, '#model'),
     rules: requireElement(root, '#rules'),
   };
 
@@ -124,9 +126,9 @@ export function mountResults(root: ParentNode): ResultsView {
       regions.pattern.innerHTML = patternSentence(d);
       regions.plan.innerHTML = planSentence(d, inputs);
       regions.autoSize.textContent = d.autoStorySize ? `(${formatDecimal(d.autoStorySize)})` : '(—)';
+      regions.tiles.innerHTML = TILES.map((t) => tileHtml(t.key, t.title, t.unit, forecast[t.key], d)).join('');
       regions.distribution.innerHTML = distributionHtml(forecast);
       regions.charts.innerHTML = chartsHtml(forecast);
-      regions.model.innerHTML = modelHtml(forecast, inputs);
       regions.rules.innerHTML = rulesHtml(forecast);
     },
   };
