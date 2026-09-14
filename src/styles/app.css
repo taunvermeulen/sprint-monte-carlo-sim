@@ -919,13 +919,35 @@ table.dist {
   margin: 0;
   max-width: 60ch;
 }
+.foot .social {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  color: var(--ink-3);
+  margin-left: 2px;
+}
+.foot .social:hover,
+.foot .social:focus-visible {
+  color: #0a66c2;
+}
 .foot-logo {
   display: block;
   height: 40px;
   width: auto;
 }
 @media (prefers-color-scheme: dark) {
-  .foot-logo {
+  .foot .social {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  color: var(--ink-3);
+  margin-left: 2px;
+}
+.foot .social:hover,
+.foot .social:focus-visible {
+  color: #0a66c2;
+}
+.foot-logo {
     background: #ffffff;
     padding: 4px 8px;
     border-radius: 6px;
