@@ -22,7 +22,7 @@ body {
   max-width: 1260px;
   margin: 0 auto;
   padding-inline: 20px;
-  padding-block: 22px 56px;
+  padding-block: 22px 84px;
 }
 
 :focus-visible {
@@ -874,5 +874,34 @@ table.dist {
 @media (prefers-reduced-motion: reduce) {
   .chart .bar {
     transition: none;
+  }
+}
+
+/* ---------- footer ---------- */
+.foot {
+  margin-top: 48px;
+  padding-top: 28px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink-2);
+  font-size: 14px;
+  text-align: center;
+}
+.foot p {
+  margin: 0;
+}
+.foot-logo {
+  display: block;
+  height: 40px;
+  width: auto;
+}
+@media (prefers-color-scheme: dark) {
+  .foot-logo {
+    background: #ffffff;
+    padding: 4px 8px;
+    border-radius: 6px;
   }
 }
