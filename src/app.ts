@@ -48,10 +48,11 @@ export function startApp(root: ParentNode = document, repository: InputsReposito
   const toolbar = mountToolbar(requireElement(root, '#toolbar'), store);
   mountSprintTable(requireElement(root, '#history'), store);
   mountTargetsForm(requireElement(root, '#targets'), store);
-  const odds = mountOdds(requireElement(root, '#odds'), {
-    onRecalculate: recalculate,
-    onToggleDetails: () => setDetailsOpen(!preferences.detailsOpen),
-  });
+  const odds = mountOdds(
+    requireElement(root, '#odds'),
+    { onRecalculate: recalculate, onToggleDetails: () => setDetailsOpen(!preferences.detailsOpen) },
+    requireElement<HTMLButtonElement>(root, '#rollFloat'),
+  );
   const results = mountResults(root);
   mountLearn(requireElement(root, '#learn'));
 

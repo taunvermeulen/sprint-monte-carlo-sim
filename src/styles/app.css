@@ -94,6 +94,18 @@ textarea {
   opacity: 0.9;
   background: var(--ink);
 }
+.btn.float {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 10;
+  padding: 10px 18px;
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+}
+.btn.float[hidden] {
+  display: none;
+}
 .btn.small {
   padding: 5px 10px;
   font-size: 12px;

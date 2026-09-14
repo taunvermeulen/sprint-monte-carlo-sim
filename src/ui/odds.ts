@@ -14,7 +14,7 @@ export interface OddsView {
 }
 
 /** Step 3: the answer, in one number and three plain sentences. */
-export function mountOdds(root: HTMLElement, handlers: OddsHandlers): OddsView {
+export function mountOdds(root: HTMLElement, handlers: OddsHandlers, floatingButton?: HTMLButtonElement): OddsView {
   root.innerHTML = `
     <div class="panel-h">
       <h2><span class="step-no">3</span> Your odds</h2>
@@ -34,8 +34,22 @@ export function mountOdds(root: HTMLElement, handlers: OddsHandlers): OddsView {
   const stamp = requireElement(root, '#stamp');
   const toggle = requireElement<HTMLButtonElement>(root, '#toggleDetails');
 
-  requireElement(root, '#reroll').addEventListener('click', handlers.onRecalculate);
+  const reroll = requireElement<HTMLButtonElement>(root, '#reroll');
+  reroll.addEventListener('click', handlers.onRecalculate);
   toggle.addEventListener('click', handlers.onToggleDetails);
+
+  // While the panel's button is scrolled out of view (reading the charts), a
+  // floating copy takes over so you can re-roll and watch the bars move.
+  if (floatingButton) {
+    floatingButton.addEventListener('click', handlers.onRecalculate);
+    const sync = () => {
+      const { top, bottom } = reroll.getBoundingClientRect();
+      floatingButton.hidden = bottom > 0 && top < window.innerHeight;
+    };
+    window.addEventListener('scroll', sync, { passive: true });
+    window.addEventListener('resize', sync, { passive: true });
+    sync();
+  }
 
   function renderEmpty(inputs: ForecastInputs): void {
     hero.innerHTML = `
