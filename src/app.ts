@@ -6,6 +6,7 @@ import { loadPreferences, savePreferences } from './services/preferences';
 import { decodeShareHash } from './services/shareLink';
 import { localStorageRepository, type InputsRepository } from './services/storage';
 import { requireElement } from './ui/format';
+import { initHelpPopovers } from './ui/help';
 import { mountLearn } from './ui/learn';
 import { mountOdds } from './ui/odds';
 import { mountResults } from './ui/results';
@@ -55,6 +56,7 @@ export function startApp(root: ParentNode = document, repository: InputsReposito
   );
   const results = mountResults(root);
   mountLearn(requireElement(root, '#learn'));
+  initHelpPopovers(root);
 
   function recalculate(): void {
     const forecast = runForecast(store.get());

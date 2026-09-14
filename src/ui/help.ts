@@ -28,3 +28,44 @@ export type HelpKey = keyof typeof GLOSSARY;
 export function help(key: HelpKey): string {
   return `<span class="help"><button type="button" class="help-btn" aria-label="What does this mean?">?</button><span class="help-pop" role="tooltip">${escapeHtml(GLOSSARY[key])}</span></span>`;
 }
+
+const POP_WIDTH = 260;
+const GAP = 8;
+const EDGE = 12;
+
+/**
+ * Popovers are positioned against the viewport, not the button, so they are
+ * never clipped by a scrolling table or pushed off a narrow screen.
+ */
+export function initHelpPopovers(root: ParentNode = document): void {
+  const place = (button: HTMLElement) => {
+    const pop = button.nextElementSibling as HTMLElement | null;
+    if (!pop) return;
+    const r = button.getBoundingClientRect();
+    const width = Math.min(POP_WIDTH, window.innerWidth - EDGE * 2);
+    const left = Math.min(Math.max(r.left + r.width / 2 - width / 2, EDGE), window.innerWidth - width - EDGE);
+    pop.style.width = `${width}px`;
+    pop.style.left = `${left}px`;
+    // Prefer above; drop below when there's no room.
+    pop.classList.toggle('below', r.top < 120);
+    pop.style.top = r.top < 120 ? `${r.bottom + GAP}px` : `${r.top - GAP}px`;
+    pop.style.setProperty('--arrow-x', `${r.left + r.width / 2 - left}px`);
+  };
+  const onShow = (event: Event) => {
+    const button = (event.target as HTMLElement).closest<HTMLElement>('.help-btn');
+    if (button) place(button);
+  };
+  root.addEventListener('mouseover', onShow);
+  root.addEventListener('focusin', onShow);
+
+  // Tap to pin open (touch screens don't hover, and iOS doesn't focus buttons); tap elsewhere to close.
+  root.addEventListener('click', (event) => {
+    const button = (event.target as HTMLElement).closest<HTMLElement>('.help-btn');
+    const wasOpen = button?.parentElement?.classList.contains('open');
+    root.querySelectorAll('.help.open').forEach((el) => el.classList.remove('open'));
+    if (button && !wasOpen) {
+      place(button);
+      button.parentElement?.classList.add('open');
+    }
+  });
+}
