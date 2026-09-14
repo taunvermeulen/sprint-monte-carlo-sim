@@ -1,34 +1,92 @@
 # Monte Carlo Sprint Sim
 
-A single-file web app (`index.html`) that forecasts sprint delivery odds from your
-sprint history — velocity (story points) and flow (stories) — using a 1,000–10,000
-trial Monte Carlo simulation. No build step, no server, no dependencies.
+Forecasts whether a team will hit a delivery target by a date, from its sprint
+history. Two measures are simulated side by side — **velocity** (story points)
+and **flow** (stories completed) — because a project isn't done until both
+effort and scope land.
 
-## Run it locally
-Double-click `index.html`.
+Ported from a Google Sheets Apps Script dashboard. Same model, same numbers.
 
-## Deploy (pick one)
+## What it does
 
-### Netlify Drop — fastest, no git
-1. Go to https://app.netlify.com/drop (free account).
-2. Drag this whole folder onto the page.
-3. You get a public URL like `https://something.netlify.app`. Rename it under
-   Site settings → Change site name.
-To update later: open the site → Deploys → drag the folder again.
+1. Takes sprint history (name, points, stories) — typed, pasted from a
+   spreadsheet, or imported.
+2. Computes rolling average and sample standard deviation per measure over a
+   chosen window (all sprints or the last N).
+3. Works out sprints available between the start and target dates, and the story
+   scope from target points ÷ average story size.
+4. Rolls 1,000–10,000 trials: each is one draw from
+   `N(sprints · mean, √sprints · sd)`, floored at zero.
+5. Reports the probability of hitting each target, the P50/P75/P85/P95
+   outcomes, a histogram of the trials, and a plain-language reading:
+   which sizing problem (if any) the two odds reveal, and which P85 is the
+   binding commitment.
 
-### GitHub Pages
-1. Create an empty repo on GitHub (e.g. `monte-carlo-sprint-sim`).
-2. In this folder:
-   ```
-   git remote add origin https://github.com/<you>/monte-carlo-sprint-sim.git
-   git push -u origin main
-   ```
-3. Repo → Settings → Pages → Source: "Deploy from a branch", branch `main`, folder `/ (root)`.
-4. Your app is at `https://<you>.github.io/monte-carlo-sprint-sim/`.
-To update later: commit and push.
+Nothing else. No accounts, no server, no tracking.
 
-## Sharing data with others
-- **Copy share link** — the sprint history and targets are packed into the URL;
-  anyone opening it sees the same data.
-- **Export / Import JSON** — a file you can send around or keep as a backup.
-- Each person's edits are saved in their own browser (localStorage) between visits.
+## Run
+
+```bash
+npm install
+npm run dev        # http://localhost:5173
+npm test           # unit tests
+npm run build      # production build in dist/
+```
+
+## Architecture
+
+```
+index.html            page shell: static regions the views mount into
+src/
+  main.ts             entry: styles + startApp()
+  app.ts              composition root: loads inputs, wires store → views → forecast
+  domain/             pure logic, no DOM, fully unit-tested
+    types.ts          Sprint, ForecastInputs, DerivedInputs, Forecast
+    statistics.ts     mean, sample std dev, inclusive percentile, fraction ≥ threshold
+    random.ts         Box–Muller normal, seeded RNG for tests
+    history.ts        history window, series stats, derived figures (sprints, scope)
+    simulation.ts     simulateDelivery / runForecast
+    interpretation.ts confidence bands, sizing diagnosis, binding commitment
+  state/
+    store.ts          minimal observable store (get / set / update / subscribe)
+    schema.ts         normalizeInputs: anything → valid ForecastInputs
+    defaults.ts       example inputs shown on first open
+    options.ts        allowed windows, sprint lengths, trial counts
+  services/           browser-facing I/O, each behind a small function
+    storage.ts        localStorage repository
+    serialization.ts  compact wire format for links and files
+    shareLink.ts      inputs ⇄ URL hash
+    transfer.ts       JSON export / import, clipboard
+    spreadsheetParser.ts  pasted spreadsheet text → sprint rows
+  ui/                 one module per screen region; render from state, write to the store
+    toolbar.ts        trials, recalculate, share / export / import
+    sprintTable.ts    editable history table, paste box, window select
+    targetsForm.ts    dates, sprint length, target points, story size
+    results.ts        metrics, tiles, distribution table, charts, reading
+    histogram.ts      SVG column chart
+    format.ts         number/HTML formatting helpers
+  styles/
+    tokens.css        colours and fonts (light + dark)
+    app.css           layout and components
+tests/                Vitest unit tests for domain and services
+```
+
+**Data flow.** `app.ts` builds a `Store<ForecastInputs>` from a share link,
+saved state, or the defaults. Views subscribe to the store and re-render when
+another view changes it; each view's own edits skip its re-render so typing
+keeps focus. Every store change is saved to `localStorage` and, after a short
+debounce, re-runs `runForecast` and re-renders the results.
+
+**Persistence and sharing.** Inputs are saved per browser. To hand them to
+someone else: *Copy share link* (the whole document travels in the URL
+fragment) or *Export JSON* → *Import JSON*.
+
+## Deploy
+
+Any static host works; the build is plain HTML/CSS/JS.
+
+**Vercel:** import the GitHub repo → Framework Preset "Vite" (auto-detected) →
+Deploy. Every push to `main` redeploys.
+
+**Netlify / GitHub Pages / anything else:** build command `npm run build`,
+publish directory `dist`.

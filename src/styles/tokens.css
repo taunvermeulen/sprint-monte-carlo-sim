@@ -1,0 +1,51 @@
+/* Design tokens. Series hues are fixed: points = blue, stories = orange. */
+:root {
+  color-scheme: light;
+  --bg: #f3f5f8;
+  --surface: #ffffff;
+  --surface-2: #eaeef3;
+  --line: #dbe1e8;
+  --line-2: #c9d1da;
+  --ink: #141a22;
+  --ink-2: #5b6674;
+  --ink-3: #8b96a5;
+  --points: #2a78d6;
+  --stories: #eb6834;
+  --good: #1f8a3b;
+  --good-bg: #e3f4e8;
+  --warn: #a86c00;
+  --warn-bg: #fbefd6;
+  --bad: #c9342f;
+  --bad-bg: #fbe3e1;
+  --focus: #2a78d6;
+  --tip-bg: #141a22;
+  --tip-ink: #ffffff;
+
+  --font-ui: Manrope, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #0f141a;
+    --surface: #171e26;
+    --surface-2: #1f2832;
+    --line: #2a3541;
+    --line-2: #3a4756;
+    --ink: #eef2f6;
+    --ink-2: #a3aebb;
+    --ink-3: #6f7b89;
+    --points: #3987e5;
+    --stories: #e0642f;
+    --good: #4cc26b;
+    --good-bg: #153322;
+    --warn: #e0a63a;
+    --warn-bg: #3a2d10;
+    --bad: #ef6b66;
+    --bad-bg: #3d1c1b;
+    --focus: #5598e7;
+    --tip-bg: #eef2f6;
+    --tip-ink: #141a22;
+  }
+}
