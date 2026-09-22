@@ -919,12 +919,21 @@ table.dist {
   margin: 0;
   max-width: 60ch;
 }
+/* Flex the meta line so the icon centres against the text instead of
+   hanging off its baseline. */
+.foot .meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.foot .sep {
+  color: var(--ink-3);
+}
 .foot .social {
   display: inline-flex;
   align-items: center;
-  vertical-align: middle;
   color: var(--ink-3);
-  margin-left: 2px;
 }
 .foot .social:hover,
 .foot .social:focus-visible {
