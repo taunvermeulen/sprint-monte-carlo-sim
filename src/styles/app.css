@@ -943,6 +943,7 @@ table.dist {
   display: block;
   height: 40px;
   width: auto;
+  max-width: 100%;
 }
 @media (prefers-color-scheme: dark) {
   /* The wordmark is dark ink; give it a white card so it stays legible. */
