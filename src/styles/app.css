@@ -930,26 +930,28 @@ table.dist {
 .foot .social:focus-visible {
   color: #0a66c2;
 }
+.foot-logo-link {
+  display: inline-block;
+  border-radius: 8px;
+  padding: 4px 8px;
+  transition: opacity 0.12s;
+}
+.foot-logo-link:hover {
+  opacity: 0.72;
+}
 .foot-logo {
   display: block;
   height: 40px;
   width: auto;
 }
 @media (prefers-color-scheme: dark) {
-  .foot .social {
-  display: inline-flex;
-  align-items: center;
-  vertical-align: middle;
-  color: var(--ink-3);
-  margin-left: 2px;
-}
-.foot .social:hover,
-.foot .social:focus-visible {
-  color: #0a66c2;
-}
-.foot-logo {
+  /* The wordmark is dark ink; give it a white card so it stays legible. */
+  .foot-logo-link {
     background: #ffffff;
-    padding: 4px 8px;
-    border-radius: 6px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .foot-logo-link {
+    transition: none;
   }
 }
