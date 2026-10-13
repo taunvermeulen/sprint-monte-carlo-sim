@@ -26,6 +26,7 @@ const forecast = (points: SeriesForecast, stories: SeriesForecast, sprintsAvaila
   },
   points,
   stories,
+  bothProbability: Math.min(points.probability, stories.probability),
 });
 
 describe('confidenceBand', () => {

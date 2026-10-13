@@ -62,6 +62,7 @@ export interface SeriesForecast {
   target: number;
   /** Share of trials that delivered at least `target`. */
   probability: number;
+  /** The amount reached in 50% of trials (the 50th percentile of the pile). */
   p50: number;
   p75: number;
   p85: number;
@@ -74,4 +75,11 @@ export interface Forecast {
   derived: DerivedInputs;
   points: SeriesForecast;
   stories: SeriesForecast;
+  /**
+   * Share of trials where points AND stories both reached their target — the
+   * honest "will we make it" figure, since a project isn't done until both land.
+   * Lower than either measure alone, and not the product of the two: points and
+   * stories are drawn from the same sprints, so they rise and fall together.
+   */
+  bothProbability: number;
 }

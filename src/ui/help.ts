@@ -9,9 +9,11 @@ export const GLOSSARY = {
   window:
     'Older sprints may not reflect the team today. Use fewer sprints if the team or the kind of work changed recently.',
   variability:
-    'The ± is how much a typical sprint swings from the average. That swing is why the forecast is a range with odds, not a single number.',
+    'The ± is how much a typical sprint swings from the average. It describes your history; the forecast itself replays the real sprints rather than this summary.',
+  both:
+    'Points and stories are drawn from the same sprints, so each replay keeps them paired. This is the share of replays where both targets landed — the honest "did we finish" number.',
   probability:
-    'The remaining sprints were replayed 1,000 times using your team’s real pattern. This is how many of those replays reached the target.',
+    'The remaining sprints were replayed 1,000 times, each one drawn at random from a sprint you actually had. This is how many of those replays reached the target.',
   p85:
     'The amount you reached in 85 of every 100 replays. Committing here means you’re wrong about one time in seven — the level most teams are comfortable with.',
   storySize:

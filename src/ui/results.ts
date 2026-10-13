@@ -14,7 +14,10 @@ const SERIES: { key: SeriesKey; title: string; unit: string }[] = [
 function patternSentence(d: DerivedInputs): string {
   if (d.sprintsUsed === 0) return 'Add a few sprints and the team’s pattern will appear here.';
   const scope = d.sprintsUsed === d.sprintsComplete ? `all ${d.sprintsUsed}` : `the last ${d.sprintsUsed} of ${d.sprintsComplete}`;
-  const few = d.sprintsUsed < 3 ? ' Three or more sprints give a much better read.' : '';
+  const few =
+    d.sprintsUsed < 5
+      ? ` The forecast draws from these ${d.sprintsUsed} sprint${d.sprintsUsed === 1 ? '' : 's'} only &mdash; five or more gives a much better read.`
+      : '';
   return `Over ${scope} sprints the team finishes about <b class="mono">${formatDecimal(d.points.mean)} points</b> (&plusmn;${formatDecimal(d.points.stdDev)}) and <b class="mono">${formatDecimal(d.stories.mean)} stories</b> (&plusmn;${formatDecimal(d.stories.stdDev)}) per sprint. ${help('variability')}${few}`;
 }
 
@@ -76,6 +79,7 @@ function chartsHtml(forecast: Forecast): string {
 function rulesHtml(forecast: Forecast): string {
   const commit = bindingCommitment(forecast);
   return `
+    <div class="r"><span class="num">both</span><div><h4>Odds that both targets land: <b class="mono">${formatPercent(forecast.bothProbability)}</b> ${help('both')}</h4><p>Each replay draws whole sprints, so the points and stories that happened together stay together. This counts the replays where the team cleared <i>both</i> targets &mdash; always lower than either measure on its own.</p></div></div>
     <div class="r"><span class="num">rule</span><div><h4>Commit on whichever P85 is lower</h4><p>A project isn't done until both effort and scope land. Right now the tighter one is <b>${commit.series}</b>: <b class="mono">${formatInt(commit.delivered)}</b> against a target of <b class="mono">${formatInt(commit.target)}</b> (${formatPercent(commit.ratio, 0)}).</p></div></div>
     <div class="r"><span class="num">1</span><div><h4>High point odds, low story odds</h4><p>Effort isn't the problem — finishing stories is. Story count per sprint swings more than points do: inconsistent sizes, or work that starts but doesn't finish. Keep stories small and similar, limit work in progress, trim per-story overhead.</p></div></div>
     <div class="r"><span class="num">2</span><div><h4>Low point odds, high story odds</h4><p>You close a steady number of stories, but effort per sprint swings — a few large stories carry most of the points. Split the big ones.</p></div></div>`;
