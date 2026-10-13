@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Monte Carlo Forecasting for Scrum Teams</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm 20mm 16mm; }
+  * { box-sizing: border-box; }
+  html { font-size: 11pt; }
+  body { margin: 0; font-family: Georgia, "Times New Roman", serif; color: #1a1f27; line-height: 1.5; }
+  h1, h2, h3, h4 { font-family: "Segoe UI", Helvetica, Arial, sans-serif; color: #10151b; line-height: 1.2; }
+  h1 { font-size: 27pt; margin: 0 0 6pt; letter-spacing: -0.4pt; }
+  h2 { font-size: 16.5pt; margin: 22pt 0 8pt; padding-bottom: 4pt; border-bottom: 2px solid #1f8a3b; page-break-after: avoid; }
+  h3 { font-size: 12.5pt; margin: 16pt 0 5pt; page-break-after: avoid; }
+  h4 { font-size: 11pt; margin: 12pt 0 3pt; page-break-after: avoid; }
+  p { margin: 0 0 8pt; }
+  ul, ol { margin: 0 0 8pt 0; padding-left: 20pt; }
+  li { margin-bottom: 3pt; }
+  code, .f { font-family: Consolas, "Courier New", monospace; font-size: 9.5pt; background: #f1f4f8; padding: 1px 4px; border-radius: 3px; }
+  .formula { font-family: Consolas, "Courier New", monospace; font-size: 10.5pt; background: #f1f4f8; border-left: 3px solid #1f8a3b; padding: 7pt 10pt; margin: 8pt 0 10pt; white-space: pre-wrap; page-break-inside: avoid; }
+  table { border-collapse: collapse; width: 100%; margin: 6pt 0 12pt; font-size: 10pt; page-break-inside: avoid; }
+  th, td { border: 1px solid #cfd6de; padding: 4pt 6pt; vertical-align: top; text-align: left; }
+  th { background: #e9eef4; font-family: "Segoe UI", Helvetica, Arial, sans-serif; font-size: 9.5pt; }
+  td.n, th.n { text-align: right; font-family: Consolas, monospace; font-size: 9.5pt; }
+  .box { border: 1px solid #cfd6de; border-radius: 6px; padding: 8pt 12pt; margin: 8pt 0 12pt; background: #fafbfc; page-break-inside: avoid; }
+  .key { background: #eef7f0; border-color: #b7dfc2; }
+  .warn { background: #fdf4e3; border-color: #f0d49a; }
+  .say { background: #eaf2fc; border-color: #b9d2f2; }
+  .lbl { display: block; font-family: "Segoe UI", Helvetica, Arial, sans-serif; font-size: 9pt; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 3pt; }
+  .key .lbl { color: #1f8a3b; }
+  .warn .lbl { color: #a86c00; }
+  .say .lbl { color: #2a78d6; }
+  .cover { page-break-after: always; padding-top: 42mm; }
+  .cover .sub { font-family: "Segoe UI", Helvetica, Arial, sans-serif; font-size: 13pt; color: #5b6674; margin-bottom: 26pt; line-height: 1.35; }
+  .cover .meta { font-family: "Segoe UI", Helvetica, Arial, sans-serif; font-size: 10pt; color: #5b6674; }
+  .toc { font-family: "Segoe UI", Helvetica, Arial, sans-serif; font-size: 10.5pt; columns: 2; column-gap: 24pt; }
+  .toc ol { padding-left: 18pt; }
+  .pb { page-break-before: always; }
+  .small { font-size: 9.5pt; color: #5b6674; }
+  figure { margin: 8pt 0 12pt; page-break-inside: avoid; }
+  figcaption { font-family: "Segoe UI", Helvetica, Arial, sans-serif; font-size: 9pt; color: #5b6674; margin-top: 3pt; }
+  .qa dt { font-family: "Segoe UI", Helvetica, Arial, sans-serif; font-weight: 700; margin-top: 9pt; page-break-after: avoid; }
+  .qa dd { margin: 2pt 0 0 0; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14pt; }
+  .bowl { font-family: "Segoe UI", Helvetica, Arial, sans-serif; font-size: 10pt; }
+  .foot-note { border-top: 1px solid #cfd6de; margin-top: 18pt; padding-top: 8pt; font-size: 9.5pt; color: #5b6674; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <h1>Monte Carlo Forecasting<br>for Scrum Teams</h1>
+  <div class="sub">How to turn sprint history into delivery odds &mdash;<br>and why a single delivery date is a coin toss</div>
+  <div class="box key">
+    <span class="lbl">The whole method in four lines</span>
+    Write each past sprint's result on a slip of paper and put the slips in a bowl.<br>
+    For every sprint left before your deadline, draw a slip, note it, and <b>put it back</b>.<br>
+    Add up the slips: that's one possible future. Do it a thousand times.<br>
+    The share of futures that reach your target is your probability.
+  </div>
+  <p class="meta" style="margin-top:26pt">A practical guide &middot; free to share &middot; Digital2DNA</p>
+</div>
+
+<h2>Contents</h2>
+<div class="toc">
+<ol>
+  <li>The problem with a single number</li>
+  <li>The idea: a bowl of sprints</li>
+  <li>What you need to start</li>
+  <li>Step 1 &mdash; Your history</li>
+  <li>Step 2 &mdash; Your goal</li>
+  <li>Step 3 &mdash; One replay</li>
+  <li>Step 4 &mdash; A thousand replays</li>
+  <li>Why not a bell curve?</li>
+  <li>Two measures: effort and scope</li>
+  <li>How to commit</li>
+  <li>What this cannot do</li>
+  <li>A worked example, end to end</li>
+  <li>Build it yourself in a spreadsheet</li>
+  <li>Common questions</li>
+  <li>Cheat sheet and glossary</li>
+</ol>
+</div>
+
+<h2>1. The problem with a single number</h2>
+<p>Here is how most teams forecast. Velocity is about 40 points a sprint. There are 8 sprints before the deadline. So we'll deliver 320 points, and the 300 points of scope will be comfortably done.</p>
+<p>That arithmetic is not wrong, but the conclusion is. 320 is the <i>middle</i> of what might happen. Roughly half of all possible futures land below it. Presenting it as the plan is presenting a coin toss as a commitment &mdash; and when the team misses, it looks like a failure of execution rather than what it was: a forecast with no margin in it.</p>
+<p>The missing information is not the average. It is the <b>spread</b>. A team that delivers 39, 41, 40, 40, 39 is a very different proposition from one delivering 12, 58, 33, 47, 50, even though both average 40. The first can commit to nearly its average. The second cannot.</p>
+<p>Monte Carlo forecasting keeps both the average and the spread, and answers the questions a stakeholder actually has:</p>
+<ul>
+  <li><b>What are the odds we hit this date?</b></li>
+  <li><b>What can we commit to and be fairly sure of?</b></li>
+  <li><b>How much margin do we actually have?</b></li>
+</ul>
+<div class="box say">
+  <span class="lbl">Explaining it to a stakeholder</span>
+  "We can give you a date with a 50% chance, or a date with an 85% chance. They're different dates. Which would you like to plan around?"
+</div>
+
+<h2>2. The idea: a bowl of sprints</h2>
+<p>A Monte Carlo simulation answers "what are the odds?" by playing the situation out many times with realistic random variation, then counting how often each outcome happened. It was named after the casino. There is nothing exotic in it.</p>
+<p>For sprint forecasting the mechanic is this:</p>
+<ol class="bowl">
+  <li>Write what each past sprint delivered on its own slip of paper.</li>
+  <li>Put every slip in a bowl.</li>
+  <li>You have 8 sprints before the deadline. Draw a slip, write the number down, <b>put the slip back</b>, and repeat until you have 8 numbers.</li>
+  <li>Add them up. That is one plausible future.</li>
+  <li>Tip the bowl out and do the whole thing again. A thousand times.</li>
+</ol>
+<p>Now you have a thousand futures. Count how many reached your target: that is your probability. Sort them and look at the one 15% from the bottom: that is the number you'd beat 85 times in 100.</p>
+<div class="box key">
+  <span class="lbl">Why the slip goes back in the bowl</span>
+  "With replacement" is the part people skip, and it matters. If you drew without replacing, you would just be reshuffling the same sprints &mdash; and a replay the length of your history would always total the same thing. Putting the slip back makes each draw independent, so a replay <i>can</i> contain two disastrous sprints in a row even though your history only held one. Real projects do that. Your forecast should be allowed to.
+</div>
+<p>Notice what the bowl method does <i>not</i> require. You do not have to decide what shape your velocity data has, or whether it is "normal", or fit any curve to it. The bowl only ever contains sprints that really happened, so whatever pattern your team has &mdash; steady, lumpy, occasionally catastrophic &mdash; is already in there. Statisticians call this <b>resampling</b> or <b>bootstrapping</b>. It is the most assumption-free tool in the box.</p>
+
+<h2>3. What you need to start</h2>
+<table>
+  <tr><th style="width:28%">Input</th><th>Notes</th></tr>
+  <tr><td>Sprint history</td><td>For each past sprint: story points completed, and stories completed. Five sprints is a workable minimum; eight to twelve is comfortable. Only count work that actually met your definition of done.</td></tr>
+  <tr><td>How far back to look</td><td>Older sprints may describe a team that no longer exists. Drop sprints from before a real change (new members, a different kind of work, a new definition of done).</td></tr>
+  <tr><td>Start and target dates</td><td>The window you are forecasting.</td></tr>
+  <tr><td>Sprint length</td><td>Must match the sprints in your history. This is the single most common input error &mdash; see the warning below.</td></tr>
+  <tr><td>Target scope</td><td>In story points. A story count can be derived from it.</td></tr>
+</table>
+<div class="box warn">
+  <span class="lbl">Sprint length is not a speed dial</span>
+  If your history is made of 2-week sprints and you tell the tool sprints are 1 week, it will fit twice as many sprints before the deadline and roughly double the forecast. The team did not get faster; the inputs contradicted each other. Sprint length only answers "how many of those past-looking sprints fit before the date?"
+</div>
+
+<h2>4. Step 1 &mdash; Your history</h2>
+<p>This is the whole input to the model. Everything else is arithmetic.</p>
+<p>Two summary numbers are worth computing, not because the forecast needs them &mdash; it draws from the raw sprints &mdash; but because they tell you at a glance what kind of team you are looking at:</p>
+<div class="formula">average   &mu; = sum of sprints / number of sprints
+spread    &sigma; = &radic;( sum of (sprint &minus; &mu;)&sup2; / (n &minus; 1) )     [a spreadsheet's STDEV]</div>
+<p>Read &sigma; as "a typical sprint lands this far from the average". A team averaging 40 with &sigma; = 3.6 is predictable. The same average with &sigma; = 15 is not, and no amount of forecasting will make it so &mdash; though the forecast will at least tell you the truth about it.</p>
+<p class="small">The <code>n &minus; 1</code> rather than <code>n</code> corrects for the fact that you are estimating spread from a sample rather than measuring a whole population. Every spreadsheet's <code>STDEV</code> does this.</p>
+<h3>How much history?</h3>
+<table>
+  <tr><th class="n">Sprints</th><th>What you can expect</th></tr>
+  <tr><td class="n">1&ndash;2</td><td>Not a forecast. The bowl holds one or two slips; every replay is nearly identical.</td></tr>
+  <tr><td class="n">3&ndash;4</td><td>Directional at best. The shape of the team's variation is barely represented.</td></tr>
+  <tr><td class="n">5&ndash;7</td><td>Usable. Treat the tails (P95) with suspicion.</td></tr>
+  <tr><td class="n">8&ndash;12</td><td>Comfortable. Enough slips for the bowl to represent real variety.</td></tr>
+  <tr><td class="n">12+</td><td>Good &mdash; but now ask whether the oldest ones still describe this team.</td></tr>
+</table>
+
+<h2>5. Step 2 &mdash; Your goal</h2>
+<div class="formula">sprints available   n  = &lfloor; (target date &minus; start date) / sprint length &rfloor;
+story size          s  = total points in history / total stories in history
+target stories      T&#8347; = &lfloor; target points / s &rfloor;</div>
+<p>Both roundings go <i>down</i>, deliberately. A sprint that ends after the deadline cannot help you, and a fraction of a story is not a delivered story.</p>
+<p>Deriving a story target from the point target lets you check the forecast two ways &mdash; see section 9. If your coming work will be sliced differently from your past work, set the story size by hand instead.</p>
+
+<h2>6. Step 3 &mdash; One replay</h2>
+<p>One replay is one possible future. To build it, draw <code>n</code> slips from the bowl with replacement and add them up.</p>
+<div class="formula">for each of the n remaining sprints:
+    pick a past sprint at random (any one, every time, equally likely)
+    add its result to the running total
+the total is one replay</div>
+<p>That is the entire mechanic. Two properties follow from it, and both are features:</p>
+<ul>
+  <li><b>A replay can never contain a sprint the team has never had.</b> If your worst sprint was 12 points, no future in the simulation contains a 9-point sprint.</li>
+  <li><b>The shape of your data survives.</b> If one sprint in ten is a disaster, roughly one draw in ten is a disaster, and replays with two or three disasters appear at exactly the rate chance allows.</li>
+</ul>
+
+<h2>7. Step 4 &mdash; A thousand replays</h2>
+<p>Repeat step 3 a thousand times and sort the totals. Every number the method reports is read off that sorted pile.</p>
+<h3>The probability</h3>
+<div class="formula">P(hit target) = how many replays reached the target / how many replays</div>
+<h3>The percentiles</h3>
+<p>"P85" means <b>the amount you reach in 85% of replays</b>. That is the value with 85% of the pile <i>above</i> it &mdash; which makes it the 15th percentile of the sorted pile, not the 85th. This trips people up constantly.</p>
+<table>
+  <tr><th>Label</th><th>Plain meaning</th><th>Where in the sorted pile</th><th>Use it for</th></tr>
+  <tr><td>P50</td><td>a coin toss</td><td>50th percentile</td><td>Nothing you'd commit to. This is what velocity &times; sprints gives you.</td></tr>
+  <tr><td>P75</td><td>probable</td><td>25th percentile</td><td>Internal planning, stretch goals.</td></tr>
+  <tr><td>P85</td><td>safe commitment</td><td>15th percentile</td><td>What you tell stakeholders. Wrong about one time in seven.</td></tr>
+  <tr><td>P95</td><td>near certain</td><td>5th percentile</td><td>Contractual dates, regulatory deadlines.</td></tr>
+</table>
+<div class="box say">
+  <span class="lbl">Explaining P85</span>
+  "This is the number we'd hit in 85 out of 100 futures. Committing here means we're wrong about one time in seven. P50 &mdash; which is what multiplying velocity by sprints gives you &mdash; is wrong half the time."
+</div>
+<h3>The histogram</h3>
+<p>Bucket the pile and draw it, and the result is the most useful picture in agile forecasting: a visible distribution of outcomes with your target marked on it. The share of the bars to the right of the target line <i>is</i> your probability.</p>
+<figure>
+<svg id="bell" viewBox="0 0 560 190" width="100%" xmlns="http://www.w3.org/2000/svg"></svg>
+<figcaption>A thousand replays for the example in section 12. Solid line: the 300-point target. Dashed: P85. Pale bars are futures that fell short &mdash; about 1.5% of them.</figcaption>
+</figure>
+<h3>Why the numbers move when you run it again</h3>
+<p>Every run draws new slips, so the percentage wobbles. A proportion estimated from N replays carries a standard error of <code>&radic;(p(1&minus;p)/N)</code> &mdash; about &plusmn;0.5 points at 1,000 replays, &plusmn;0.16 at 10,000. The underlying answer does not change; only the sampling noise does. Treat the last digit as decoration.</p>
+<p>More replays buy precision in the <i>estimate</i>. They buy nothing in accuracy &mdash; that comes from the history. A thousand replays off five sprints of history is a precise answer to a badly-informed question.</p>
+
+<h2 class="pb">8. Why not a bell curve?</h2>
+<p>Many Monte Carlo spreadsheets &mdash; including an earlier version of our own &mdash; skip the bowl and instead fit a normal distribution (a bell curve) to velocity, then draw from that. It is tempting: a bell is fully described by just the average and the spread, and every spreadsheet has a function for it. It is also wrong in ways that matter.</p>
+<h3>Velocity is not bell-shaped</h3>
+<ul>
+  <li><b>A bell curve is symmetric. Velocity is not.</b> A team can have a catastrophic sprint and deliver almost nothing. There is no equal-and-opposite sprint where they deliver double. The real distribution leans, with a longer tail on one side.</li>
+  <li><b>A bell curve extends forever in both directions.</b> It assigns real probability to negative velocity, which is meaningless. Implementations usually patch this by clamping at zero &mdash; which is a sign the model is wrong, not a fix.</li>
+  <li><b>A bell curve understates clustered bad luck.</b> Teams have genuinely bad sprints more often than a bell predicts: incidents, outages, key people away. Those are the futures you most need represented.</li>
+</ul>
+<h3>What it costs you in practice</h3>
+<p>Here is a real-shaped team: fifteen sprints, mostly in the low twenties, with two bad ones (3 and 5 points) when an incident swallowed the sprint.</p>
+<div class="formula">22 24 21 23 25 20 24 22 23 21 <b>3</b> 24 22 <b>5</b> 23      average 20.1, spread 6.7</div>
+<table>
+  <tr><th>Horizon</th><th>Target</th><th class="n">Bell curve says</th><th class="n">Bowl says</th><th>Gap</th></tr>
+  <tr><td>4 sprints</td><td class="n">76</td><td class="n">63%</td><td class="n">59%</td><td>4 points optimistic</td></tr>
+  <tr><td>6 sprints</td><td class="n">114</td><td class="n">66%</td><td class="n">76%</td><td>10 points pessimistic</td></tr>
+  <tr><td>10 sprints</td><td class="n">190</td><td class="n">70%</td><td class="n">72%</td><td>2 points</td></tr>
+</table>
+<p>The errors do not even point the same way, which is what makes them dangerous &mdash; you cannot correct for them with a rule of thumb. Ten percentage points is the difference between "commit" and "don't".</p>
+<p>The bell also produces outright impossible futures. For this team over 6 sprints, the best conceivable outcome is 6 &times; 25 = 150 points. The bell curve happily generates totals above 172.</p>
+<h3>"But doesn't the Central Limit Theorem rescue it?"</h3>
+<p>Partly, and it is worth knowing the argument because someone will raise it. The Central Limit Theorem says that the <i>sum</i> of many independent draws tends toward a bell shape whatever the individual draws look like. So over a long horizon, modelling the <i>total</i> as normal is not indefensible &mdash; and indeed in the table above the gap narrows at 10 sprints.</p>
+<p>But: it is a defence of the output, not of the input. It weakens exactly when you need the forecast most &mdash; short horizons, few sprints, lumpy teams. And it requires you to explain the Central Limit Theorem to defend your tool. The bowl requires no defence at all. Nobody has ever needed a statistics lecture to believe that drawing past sprints out of a bowl is a fair way to imagine future ones.</p>
+<div class="box key">
+  <span class="lbl">The rule</span>
+  Don't assume a distribution when you have the data. If you have the sprints, use the sprints.
+</div>
+<p class="small">A lognormal distribution is sometimes suggested as a better fit than a bell, since it is non-negative and asymmetric. It is better. But it is still an assumption about shape, and you do not need one.</p>
+
+<h2>9. Two measures: effort and scope</h2>
+<p>Story points measure <b>effort</b>. Stories completed measure <b>scope</b> &mdash; how many things actually got finished. Forecasting both, from the same bowl, costs nothing and catches problems a single measure hides.</p>
+<h3>Draw whole sprints, not separate numbers</h3>
+<p>When you draw a slip, take the sprint's points <i>and</i> its stories together, as they actually occurred. They are correlated in real data &mdash; typically strongly &mdash; and keeping them paired preserves that. Drawing them independently would quietly imply a team could have a huge-points, tiny-stories sprint as easily as not.</p>
+<p>This also makes a genuinely useful number available: <b>the odds that both targets land</b>. Since a project is not done until the effort <i>and</i> the scope are delivered, that is the honest headline. It is always lower than either measure alone &mdash; and higher than multiplying the two probabilities together, because the measures rise and fall as one.</p>
+<h3>Reading a disagreement</h3>
+<table>
+  <tr><th style="width:28%">Pattern</th><th>What it usually means</th><th>What to do</th></tr>
+  <tr><td>Point odds good, story odds poor</td><td>Effort is fine; <i>finishing</i> is erratic. The number of stories closed per sprint swings more than the points do.</td><td>Keep stories small and similar in size; limit work in progress; cut per-story overhead (reviews, hand-offs, deploys).</td></tr>
+  <tr><td>Story odds good, point odds poor</td><td>A steady number of stories closes, but effort per sprint swings &mdash; a few large stories carry most of the points.</td><td>Split the big ones.</td></tr>
+  <tr><td>Both similar</td><td>Effort and scope agree. The forecast isn't hiding a sizing problem.</td><td>Commit on the numbers.</td></tr>
+</table>
+<div class="box warn">
+  <span class="lbl">A gap is about consistency, not size</span>
+  You will see advice saying that high point odds with low story odds means stories are "too small" and should be merged. Be careful with that: it contradicts the point of small stories, which is short feedback loops. A gap between the two odds is a <i>variability</i> signal &mdash; it says one measure is more erratic sprint to sprint, which usually means inconsistent sizing, not uniformly small stories.
+</div>
+
+<h2>10. How to commit</h2>
+<ol>
+  <li><b>Pick your confidence level before you look at the answer.</b> P85 for a normal commitment, P95 if the date is contractual. Choosing afterwards is how forecasts become wishful.</li>
+  <li><b>Commit on whichever measure is tighter.</b> Compare each measure's P85 against its own target; the lower ratio is your real constraint. You need both to land.</li>
+  <li><b>Quote a range, not a point.</b> "P50 is 320, P85 is 310" tells the whole story in nine words.</li>
+  <li><b>Re-run every sprint.</b> A forecast is a snapshot. The most valuable thing about it is watching it move.</li>
+  <li><b>Say the caveats out loud.</b> The model knows nothing about the holiday season, the rewrite, or the person leaving. You do.</li>
+</ol>
+<div class="box say">
+  <span class="lbl">A complete, honest forecast, spoken</span>
+  "Based on our last ten sprints, there's an 85% chance we deliver at least 310 points by 24 June, and a 50% chance we get past 320. The 300 we've scoped sits comfortably inside that. The main thing that would change it is the two weeks of holiday in May, which isn't in these numbers."
+</div>
+
+<h2>11. What this cannot do</h2>
+<p>Every forecasting method has a boundary. Knowing where yours is, and saying so, is what separates a forecast from a promise.</p>
+<table>
+  <tr><th style="width:26%">Assumption</th><th>What it means</th><th>What to do about it</th></tr>
+  <tr><td>The future resembles the past</td><td>Same team, same kind of work, same definition of done.</td><td>The big one. Trim the history when something real changed, and name known future disruptions as caveats.</td></tr>
+  <tr><td>Sprints are independent</td><td>A bad sprint doesn't make the next one bad.</td><td>Not quite true &mdash; problems cluster. This makes the forecast slightly optimistic. Longer history captures more clusters.</td></tr>
+  <tr><td>Your worst sprint is as bad as it gets</td><td>Resampling can't produce an outcome worse than the worst in the bowl.</td><td>The real limitation of the bowl method. With little history, treat P95 as optimistic.</td></tr>
+  <tr><td>Scope is fixed</td><td>Nothing gets added.</td><td>Not modelled at all. Re-run when scope changes; keep old forecasts to show the drift.</td></tr>
+  <tr><td>Points mean the same thing over time</td><td>A 5 today is a 5 from last quarter.</td><td>Re-estimation and point inflation break this. Story counts are more robust &mdash; another reason to track both.</td></tr>
+  <tr><td>Capacity is baked in</td><td>Holidays and on-call are only represented if they were in the history.</td><td>Either accept the average absorbs them, or restrict history to comparable sprints.</td></tr>
+</table>
+<div class="box key">
+  <span class="lbl">The honest summary</span>
+  This does not predict the future. It tells you what your own history implies, if nothing changes. Everything you know that the history doesn't is a caveat you add out loud.
+</div>
+
+<h2 class="pb">12. A worked example, end to end</h2>
+<p>A team with eight sprints behind it, eight sprints before the deadline, and 300 points of scope.</p>
+<table>
+  <tr><th>Sprint</th><th class="n">1</th><th class="n">2</th><th class="n">3</th><th class="n">4</th><th class="n">5</th><th class="n">6</th><th class="n">7</th><th class="n">8</th><th class="n">Total</th></tr>
+  <tr><td>Points</td><td class="n">42</td><td class="n">36</td><td class="n">45</td><td class="n">38</td><td class="n">41</td><td class="n">39</td><td class="n">44</td><td class="n">35</td><td class="n">320</td></tr>
+  <tr><td>Stories</td><td class="n">9</td><td class="n">7</td><td class="n">10</td><td class="n">8</td><td class="n">8</td><td class="n">9</td><td class="n">8</td><td class="n">7</td><td class="n">66</td></tr>
+</table>
+<h3>The inputs</h3>
+<div class="formula">points   average 40.0   spread 3.6
+stories  average 8.25   spread 1.0
+story size      320 / 66 = 4.85 points per story
+target stories  &lfloor;300 / 4.85&rfloor; = 61
+sprints left    &lfloor;112 days / 14&rfloor; = 8</div>
+<h3>One replay, by hand</h3>
+<p>Eight draws from the bowl might give: 38, 45, 35, 41, 38, 44, 36, 45. Note that 38 and 45 each came up twice &mdash; that is replacement working. Total: <b>322 points</b>. One future, and it clears 300.</p>
+<p>Another might give 35, 36, 38, 35, 39, 36, 41, 35 = <b>295</b>. That one misses. Do this a thousand times and count.</p>
+<h3>The result</h3>
+<table>
+  <tr><th>Measure</th><th class="n">Odds of hitting target</th><th class="n">P50</th><th class="n">P75</th><th class="n">P85</th><th class="n">P95</th></tr>
+  <tr><td>Points (target 300)</td><td class="n">98.5%</td><td class="n">320</td><td class="n">313</td><td class="n">310</td><td class="n">304</td></tr>
+  <tr><td>Stories (target 61)</td><td class="n">98.2%</td><td class="n">66</td><td class="n">64</td><td class="n">63</td><td class="n">62</td></tr>
+  <tr><td><b>Both targets</b></td><td class="n"><b>97.4%</b></td><td colspan="4" class="small">Not 98.5% &times; 98.2% = 96.7% &mdash; the measures move together, so the true figure is higher.</td></tr>
+</table>
+<h3>What to say</h3>
+<p>"There's a 97% chance we deliver both the 300 points and the 61 stories by the deadline. At 85% confidence we'd commit to 310 points, which is 10 clear of the scope. This is a predictable team &mdash; the worst replay in a thousand still delivered 280."</p>
+<p class="small">The range of totals this bowl can produce is 8 &times; 35 = 280 at worst and 8 &times; 45 = 360 at best. Every forecast number sits inside that, by construction.</p>
+
+<h2>13. Build it yourself in a spreadsheet</h2>
+<p>You do not need software for this. Any spreadsheet does it in a few formulas.</p>
+<p>Put your sprint history in <code>A2:A13</code>. Then one replay of <code>n</code> sprints &mdash; summing <code>n</code> random draws with replacement &mdash; is:</p>
+<div class="formula">=SUMPRODUCT(INDEX($A$2:$A$13, RANDARRAY(n, 1, 1, COUNT($A$2:$A$13), TRUE)))</div>
+<p>Fill that down a thousand rows into column C. Then:</p>
+<div class="formula">probability   =COUNTIF(C:C, "&gt;=" &amp; target) / COUNT(C:C)
+P50           =PERCENTILE(C:C, 0.50)
+P75           =PERCENTILE(C:C, 0.25)
+P85           =PERCENTILE(C:C, 0.15)
+P95           =PERCENTILE(C:C, 0.05)
+sprints left  =MAX(0, INT((target_date - start_date) / sprint_days))
+target scope  =INT(target_points / (SUM(points) / SUM(stories)))</div>
+<p><b>Notes.</b> <code>RANDARRAY(...,TRUE)</code> gives whole numbers and needs a modern Excel or Google Sheets. The sheet re-rolls on every edit; that is the simulation re-running, not a bug. To forecast stories from the same draws, generate the row indices once into their own column and use <code>INDEX</code> twice against it &mdash; that keeps points and stories paired.</p>
+<p class="small">If your spreadsheet lacks <code>RANDARRAY</code>, the older equivalent per cell is <code>=INDEX($A$2:$A$13, RANDBETWEEN(1, COUNT($A$2:$A$13)))</code> &mdash; put <code>n</code> of those across a row and sum them, then fill down a thousand rows.</p>
+
+<h2 class="pb">14. Common questions</h2>
+<dl class="qa">
+<dt>Isn't this just velocity times sprints with extra steps?</dt>
+<dd>Velocity &times; sprints is one of the thousand futures &mdash; the middle one. The method keeps the other 999, which is where the odds and the margin come from.</dd>
+
+<dt>Where does the randomness come from?</dt>
+<dd>Entirely from your own history. The bowl contains nothing invented.</dd>
+
+<dt>Why 1,000 replays? Why not a million?</dt>
+<dd>1,000 puts the noise on a percentage at roughly half a point &mdash; below anything you'd act on. 10,000 smooths the histogram. A million changes nothing you can see.</dd>
+
+<dt>Why do the numbers change every time I run it?</dt>
+<dd>New draws. The underlying answer is fixed by your history; only sampling noise moves. If 97% becomes 96%, nothing happened.</dd>
+
+<dt>Why is P85 the 15th percentile and not the 85th?</dt>
+<dd>Because "85% confidence" means 85% of futures do at least this well &mdash; so 85% are above it and 15% below.</dd>
+
+<dt>Can I use this with story counts instead of points?</dt>
+<dd>Yes, and many teams prefer it. Story throughput needs no estimation at all, which sidesteps point inflation entirely. The method is identical &mdash; put story counts in the bowl.</dd>
+
+<dt>What about Kanban, where there are no sprints?</dt>
+<dd>Same method with a different bucket: use throughput per week (or per day) and count weeks instead of sprints. Nothing else changes.</dd>
+
+<dt>How do I handle a team that just changed size?</dt>
+<dd>Drop the history from before the change and accept a thinner bowl, or keep it and say the forecast is based on a different team. Do not average across the change and pretend it's one team.</dd>
+
+<dt>What if we have only three sprints of history?</dt>
+<dd>You can run it, and it will produce numbers, but the bowl holds three slips &mdash; the range of futures it can imagine is tiny and the tails are meaningless. Present it as directional and re-run as history accumulates.</dd>
+
+<dt>Does this handle scope creep?</dt>
+<dd>No. The target is fixed input. Re-run when scope changes &mdash; and keep the old forecasts, because the trend across them is often the most revealing thing you have.</dd>
+
+<dt>Our velocity is trending up. Doesn't resampling miss that?</dt>
+<dd>Yes &mdash; it treats all history as equally representative. If there's a genuine trend, use only the recent sprints that reflect the new level. Be honest about whether it's a trend or a run of good luck; three good sprints is usually the latter.</dd>
+
+<dt>Can it tell us a date rather than an amount?</dt>
+<dd>Yes, by running it the other way: draw sprints until the remaining scope is consumed, and record how many sprints it took. A thousand runs gives you a distribution of dates. Same bowl, same principle.</dd>
+
+<dt>Isn't 85% arbitrary?</dt>
+<dd>It's a convention, not a law. It happens to sit where most stakeholders' intuition about "safe" lands &mdash; wrong roughly one time in seven. Use P95 when being wrong is expensive.</dd>
+
+<dt>Can it be wrong?</dt>
+<dd>Confidently, if the future stops resembling the past. It's not a prediction; it's an implication. That distinction is the forecaster's job to communicate.</dd>
+</dl>
+
+<h2>15. Cheat sheet and glossary</h2>
+<div class="two">
+<div>
+<h4>The method</h4>
+<div class="formula">1. one slip per past sprint
+2. draw n slips WITH replacement
+3. sum them = one replay
+4. repeat 1,000 times
+5. count and sort</div>
+<h4>Reading the pile</h4>
+<div class="formula">P(hit)  = replays &ge; target / all
+P50     = 50th percentile
+P75     = 25th percentile
+P85     = 15th percentile
+P95     =  5th percentile</div>
+<h4>Sizing the goal</h4>
+<div class="formula">n  = &lfloor;days / sprint length&rfloor;
+s  = &Sigma;points / &Sigma;stories
+T&#8347; = &lfloor;target points / s&rfloor;</div>
+</div>
+<div>
+<h4>Noise on a percentage</h4>
+<div class="formula">&plusmn; &radic;( p(1&minus;p) / N )
+p=.97, N=1,000  &rarr; &plusmn;0.5 pts
+p=.97, N=10,000 &rarr; &plusmn;0.16 pts</div>
+<h4>Confidence to use</h4>
+<div class="formula">P50  never commit here
+P75  internal stretch
+P85  normal commitment
+P95  contractual dates</div>
+<h4>Committing</h4>
+<div class="formula">pick the level FIRST
+commit on the tighter measure
+quote a range
+re-run every sprint
+say the caveats out loud</div>
+</div>
+</div>
+<h4>Glossary</h4>
+<table>
+  <tr><td style="width:26%"><b>Monte Carlo simulation</b></td><td>Answering "what are the odds?" by running many random trials and counting outcomes.</td></tr>
+  <tr><td><b>Resampling / bootstrapping</b></td><td>Drawing randomly from your actual observations instead of from a fitted curve. The bowl.</td></tr>
+  <tr><td><b>With replacement</b></td><td>Putting each drawn slip back, so it can be drawn again. Makes draws independent.</td></tr>
+  <tr><td><b>Velocity</b></td><td>Story points completed per sprint.</td></tr>
+  <tr><td><b>Throughput / flow</b></td><td>Items completed per sprint (or per week).</td></tr>
+  <tr><td><b>Average (mean)</b></td><td>The middle of your history. Useful summary; not a commitment.</td></tr>
+  <tr><td><b>Standard deviation</b></td><td>How far a typical sprint sits from the average. The "&plusmn;".</td></tr>
+  <tr><td><b>Distribution</b></td><td>The shape of all possible outcomes and how likely each is.</td></tr>
+  <tr><td><b>Normal distribution</b></td><td>The bell curve. Symmetric, unbounded &mdash; and a poor fit for velocity.</td></tr>
+  <tr><td><b>Percentile</b></td><td>The value below which a given share of outcomes falls.</td></tr>
+  <tr><td><b>P85</b></td><td>The amount reached in 85% of replays &mdash; the 15th percentile of the pile.</td></tr>
+  <tr><td><b>Central Limit Theorem</b></td><td>Sums of many independent draws tend toward a bell shape, whatever the individual draws look like.</td></tr>
+</table>
+
+<div class="foot-note">
+<p><b>On the method.</b> Resampling for agile forecasting is long-established practice; Troy Magennis and Daniel Vacanti have both written extensively on it, and it underpins most serious forecasting tools. Our thanks to <b>Mike Cohn</b>, whose direct feedback prompted us to replace a normal-distribution model with resampling &mdash; and whose bowl-of-paper-slips explanation is the one reproduced here.</p>
+<p><b>Using this guide.</b> Free to share and use, including inside your own organisation. If it's useful, a link back is appreciated.</p>
+<p><b>Digital2DNA</b> &mdash; we deliver working software for organizations where complexity is the reality and progress can't wait. <span class="f">digital2dna.com</span></p>
+</div>
+
+<script>
+(function(){
+  // Histogram of 1,000 resampled replays for the section-12 example.
+  var hist=[42,36,45,38,41,39,44,35], n=8, target=300, trials=20000;
+  var totals=[]; var seed=12345;
+  function rnd(){ seed=(seed*1664525+1013904223)>>>0; return seed/4294967296; }
+  for(var i=0;i<trials;i++){ var t=0; for(var k=0;k<n;k++) t+=hist[Math.floor(rnd()*hist.length)]; totals.push(t); }
+  totals.sort(function(a,b){return a-b;});
+  var p85=totals[Math.floor(0.15*(trials-1))];
+  var lo=Math.min(totals[0],target)-6, hi=totals[trials-1]+6, bins=26, bw=(hi-lo)/bins;
+  var counts=new Array(bins).fill(0),max=0;
+  totals.forEach(function(v){ var b=Math.min(bins-1,Math.floor((v-lo)/bw)); counts[b]++; });
+  counts.forEach(function(c){ if(c>max)max=c; });
+  var W=560,H=190,mL=14,mR=14,mB=26,mT=8, base=H-mB, ph=base-mT;
+  var x=function(v){ return mL+(v-lo)/(hi-lo)*(W-mL-mR); };
+  var s='<line x1="'+mL+'" x2="'+(W-mR)+'" y1="'+base+'" y2="'+base+'" stroke="#c9d1da"/>';
+  for(var i=0;i<bins;i++){ if(!counts[i])continue;
+    var x0=x(lo+i*bw)+1,x1=x(lo+(i+1)*bw)-1,h=Math.max(1,counts[i]/max*ph),y=base-h;
+    var hit=lo+(i+0.5)*bw>=target;
+    s+='<rect x="'+x0+'" y="'+y+'" width="'+Math.max(1,x1-x0)+'" height="'+h+'" rx="2" fill="#1f8a3b" opacity="'+(hit?1:0.28)+'"/>';
+  }
+  [280,300,320,340,360].forEach(function(v){ if(v<lo||v>hi)return;
+    s+='<text x="'+x(v)+'" y="'+(base+14)+'" font-size="9" fill="#8b96a5" text-anchor="middle" font-family="Consolas,monospace">'+v+'</text>'; });
+  s+='<line x1="'+x(p85)+'" x2="'+x(p85)+'" y1="'+mT+'" y2="'+base+'" stroke="#5b6674" stroke-width="1.5" stroke-dasharray="3 3"/>';
+  s+='<line x1="'+x(target)+'" x2="'+x(target)+'" y1="'+mT+'" y2="'+base+'" stroke="#141a22" stroke-width="1.5"/>';
+  s+='<text x="'+(x(target)-4)+'" y="'+(mT+10)+'" font-size="9" fill="#141a22" text-anchor="end" font-family="Segoe UI,Arial">target 300</text>';
+  s+='<text x="'+(x(p85)+4)+'" y="'+(mT+10)+'" font-size="9" fill="#5b6674" font-family="Segoe UI,Arial">P85 '+p85+'</text>';
+  document.getElementById('bell').innerHTML=s;
+})();
+</script>
+</body>
+</html>
